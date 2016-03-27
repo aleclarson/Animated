@@ -10,9 +10,10 @@
  */
 'use strict';
 
+var Easing = require('easing');
+
 var Animation = require('./Animation');
 var AnimatedValue = require('./AnimatedValue');
-var Easing = require('./Easing');
 var RequestAnimationFrame = require('./injectable/RequestAnimationFrame');
 var CancelAnimationFrame = require('./injectable/CancelAnimationFrame');
 
@@ -43,7 +44,7 @@ class TimingAnimation extends Animation {
   ) {
     super();
     this._toValue = config.toValue;
-    this._easing = config.easing !== undefined ? config.easing : easeInOut;
+    this._easing = config.easing !== undefined ? config.easing : Easing('linear');
     this._duration = config.duration !== undefined ? config.duration : 500;
     this._delay = config.delay !== undefined ? config.delay : 0;
     this.__isInteraction = config.isInteraction !== undefined ? config.isInteraction : true;
