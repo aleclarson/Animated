@@ -19,7 +19,6 @@ var AnimatedAddition = require('./AnimatedAddition');
 var AnimatedMultiplication = require('./AnimatedMultiplication');
 var AnimatedModulo = require('./AnimatedModulo');
 var AnimatedTracking = require('./AnimatedTracking');
-var isAnimated = require('./isAnimated');
 
 var Animation = require('./Animation');
 var TimingAnimation = require('./TimingAnimation');
@@ -154,6 +153,27 @@ var decay = function(
       value.stopAnimation();
     },
   };
+};
+
+var add = function(
+  a: Animated,
+  b: Animated
+): AnimatedAddition {
+  return new AnimatedAddition(a, b);
+};
+
+var multiply = function(
+  a: Animated,
+  b: Animated
+): AnimatedMultiplication {
+  return new AnimatedMultiplication(a, b);
+};
+
+var modulo = function(
+  a: Animated,
+  modulus: number
+): AnimatedModulo {
+  return new AnimatedModulo(a, modulus);
 };
 
 var sequence = function(
@@ -442,24 +462,19 @@ module.exports = {
    * Creates a new Animated value composed from two Animated values added
    * together.
    */
-  add: function add(a: Animated, b: Animated): AnimatedAddition {
-    return new AnimatedAddition(a, b);
-  },
+  add,
+
   /**
    * Creates a new Animated value composed from two Animated values multiplied
    * together.
    */
-  multiply: function multiply(a: Animated, b: Animated): AnimatedMultiplication {
-    return new AnimatedMultiplication(a, b);
-  },
+  multiply,
 
   /**
    * Creates a new Animated value that is the (non-negative) modulo of the
    * provided Animated value
    */
-  modulo: function modulo(a: Animated, modulus: number): AnimatedModulo {
-    return new AnimatedModulo(a, modulus);
-  },
+  modulo,
 
   /**
    * Starts an animation after the given delay.
@@ -505,7 +520,7 @@ module.exports = {
    * Existential test to figure out if an object is an instance of the Animated
    * class or not.
    */
-  isAnimated,
+  isAnimated: require('./isAnimated'),
 
   /**
    * Make any React component Animatable.  Used to create `Animated.View`, etc.
