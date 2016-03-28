@@ -2,7 +2,7 @@
   "name": "animated",
   "version": "1.0.0",
   "description": "Declarative Animations Library for React and React Native",
-  "main": "lib/Animated.js",
+  "main": "src/index.js",
   "dependencies": {
     "easing": "aleclarson/easing#1.0.0",
     "es6-set": "^0.1.4",
