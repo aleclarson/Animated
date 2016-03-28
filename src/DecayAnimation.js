@@ -54,11 +54,14 @@ class DecayAnimation extends Animation {
   }
 
   onUpdate(): void {
-    var now = Date.now();
+    var elapsedTime = Date.now() - this._startTime;
 
-    var value = this._fromValue +
-      (this._velocity / (1 - this._deceleration)) *
-      (1 - Math.exp(-(1 - this._deceleration) * (now - this._startTime)));
+    var kd = 1 - this._deceleration;
+    var kv = Math.exp(elapsedTime * kd * -1);
+
+    this._lastVelocity = this._velocity * kv;
+
+    var value = this._fromValue + (this._velocity / kd) * (1 - kv);
 
     this._onUpdate(value);
 
