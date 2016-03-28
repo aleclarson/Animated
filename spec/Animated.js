@@ -24,7 +24,7 @@ describe('Animated', () => {
 
     var callback = jest.genMockFunction();
 
-    var node = new Animated.__PropsOnlyForTests({
+    var node = new Animated.Props({
       style: {
         backgroundColor: 'red',
         opacity: anim,
@@ -453,7 +453,7 @@ describe('Animated Vectors', () => {
 
     var callback = jest.genMockFunction();
 
-    var node = new Animated.__PropsOnlyForTests({
+    var node = new Animated.Props({
       style: {
         opacity: vec.x.interpolate({
           inputRange: [0, 42],

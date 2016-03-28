@@ -403,6 +403,26 @@ module.exports = {
   ValueXY: AnimatedValueXY,
 
   /**
+   * Standard map class for driving animations.
+   */
+  Map: require('./AnimatedMap'),
+
+  /**
+   * Standard transform class for driving animations.
+   */
+  Transform: require('./AnimatedTransform'),
+
+  /**
+   * Standard style class for driving animations.
+   */
+  Style: require('./AnimatedStyle'),
+
+  /**
+   * Standard props class for driving animations.
+   */
+  Props: require('./AnimatedProps'),
+
+  /**
    * Animates a value from an initial velocity to zero based on a decay
    * coefficient.
    */
@@ -499,6 +519,4 @@ module.exports = {
     RequestAnimationFrame: require('./injectable/RequestAnimationFrame').inject,
     CancelAnimationFrame: require('./injectable/CancelAnimationFrame').inject,
   },
-
-  __PropsOnlyForTests: require('./AnimatedProps'),
 };
