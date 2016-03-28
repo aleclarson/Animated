@@ -10,10 +10,11 @@
  */
 'use strict';
 
-var Animated = require('./Animated');
+var AnimatedMap = require('./AnimatedMap');
 var AnimatedStyle = require('./AnimatedStyle');
 
-class AnimatedProps extends Animated {
+// TODO: Use AnimatedMap over this.
+class AnimatedProps extends AnimatedMap {
   _props: Object;
   _callback: () => void;
 
@@ -21,62 +22,13 @@ class AnimatedProps extends Animated {
     props: Object,
     callback: () => void,
   ) {
-    super();
     if (props.style) {
       props = {
         ...props,
         style: new AnimatedStyle(props.style),
       };
     }
-    this._props = props;
-    this._callback = callback;
-    this.__attach();
-  }
-
-  __getValue(): Object {
-    var props = {};
-    for (var key in this._props) {
-      var value = this._props[key];
-      if (value instanceof Animated) {
-        props[key] = value.__getValue();
-      } else {
-        props[key] = value;
-      }
-    }
-    return props;
-  }
-
-  __getAnimatedValue(): Object {
-    var props = {};
-    for (var key in this._props) {
-      var value = this._props[key];
-      if (value instanceof Animated) {
-        props[key] = value.__getAnimatedValue();
-      }
-    }
-    return props;
-  }
-
-  __attach(): void {
-    for (var key in this._props) {
-      var value = this._props[key];
-      if (value instanceof Animated) {
-        value.__addChild(this);
-      }
-    }
-  }
-
-  __detach(): void {
-    for (var key in this._props) {
-      var value = this._props[key];
-      if (value instanceof Animated) {
-        value.__removeChild(this);
-      }
-    }
-  }
-
-  update(): void {
-    this._callback();
+    super(props, callback);
   }
 }
 

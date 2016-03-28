@@ -15,6 +15,7 @@ var AnimatedWithChildren = require('./AnimatedWithChildren');
 var AnimatedTransform = require('./AnimatedTransform');
 var FlattenStyle = require('./injectable/FlattenStyle');
 
+// TODO: Use AnimatedMap over this.
 class AnimatedStyle extends AnimatedWithChildren {
   _style: Object;
 

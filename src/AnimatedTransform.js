@@ -13,6 +13,7 @@
 var Animated = require('./Animated');
 var AnimatedWithChildren = require('./AnimatedWithChildren');
 
+// TODO: Use AnimatedMap over this.
 class AnimatedTransform extends AnimatedWithChildren {
   _transforms: Array<Object>;
 
