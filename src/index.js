@@ -522,11 +522,6 @@ module.exports = {
    */
   isAnimated: require('./isAnimated'),
 
-  /**
-   * Make any React component Animatable.  Used to create `Animated.View`, etc.
-   */
-  createAnimatedComponent: require('./createAnimatedComponent'),
-
   inject: {
     ApplyAnimatedValues: require('./injectable/ApplyAnimatedValues').inject,
     InteractionManager: require('./injectable/InteractionManager').inject,
