@@ -1,5 +1,5 @@
 {
-  "name": "animated",
+  "name": "Animated",
   "version": "1.0.0",
   "description": "Declarative Animations Library for React and React Native",
   "main": "src/index.js",
