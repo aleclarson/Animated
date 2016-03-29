@@ -13,9 +13,9 @@
 var Animated = require('./Animated');
 var AnimatedWithChildren = require('./AnimatedWithChildren');
 var AnimatedInterpolation = require('./AnimatedInterpolation');
-var Interpolation = require('./Interpolation');
+var Interpolation = require('Interpolation');
 
-import type { InterpolationConfigType } from './Interpolation';
+import type { InterpolationConfigType } from 'Interpolation';
 
 class AnimatedModulo extends AnimatedWithChildren {
   _a: Animated;

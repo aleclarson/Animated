@@ -13,13 +13,13 @@
 var AnimatedWithChildren = require('./AnimatedWithChildren');
 var InteractionManager = require('./injectable/InteractionManager');
 var AnimatedInterpolation = require('./AnimatedInterpolation');
-var Interpolation = require('./Interpolation');
+var Interpolation = require('Interpolation');
 var Animation = require('./Animation');
 var guid = require('./guid');
 var Set = require('es6-set');
 
 import type { EndCallback } from './Animation';
-import type { InterpolationConfigType } from './Interpolation';
+import type { InterpolationConfigType } from 'Interpolation';
 
 export type ValueListenerCallback = (state: {value: number}) => void;
 

@@ -14,9 +14,9 @@ var AnimatedWithChildren = require('./AnimatedWithChildren');
 var Animated = require('./Animated');
 var AnimatedValue = require('./AnimatedValue');
 var AnimatedInterpolation = require('./AnimatedInterpolation');
-var Interpolation = require('./Interpolation');
+var Interpolation = require('Interpolation');
 
-import type { InterpolationConfigType } from './Interpolation';
+import type { InterpolationConfigType } from 'Interpolation';
 
 class AnimatedMultiplication extends AnimatedWithChildren {
   _a: Animated;

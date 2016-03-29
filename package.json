@@ -6,6 +6,7 @@
   "dependencies": {
     "easing": "aleclarson/easing#1.0.0",
     "es6-set": "^0.1.4",
+    "Interpolation": "aleclarson/Interpolation#1.0.0",
     "invariant": "^2.2.0",
     "tinycolor": "0.0.1"
   }

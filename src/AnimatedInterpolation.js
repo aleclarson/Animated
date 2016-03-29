@@ -13,7 +13,7 @@
 var Animated = require('./Animated');
 var AnimatedWithChildren = require('./AnimatedWithChildren');
 var invariant = require('invariant');
-var Interpolation = require('./Interpolation');
+var Interpolation = require('Interpolation');
 var guid = require('./guid');
 
 import type { ValueListenerCallback } from './AnimatedValue';

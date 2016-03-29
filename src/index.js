@@ -25,7 +25,7 @@ var TimingAnimation = require('./TimingAnimation');
 var DecayAnimation = require('./DecayAnimation');
 var SpringAnimation = require('./SpringAnimation');
 
-import type { InterpolationConfigType } from './Interpolation';
+import type { InterpolationConfigType } from 'Interpolation';
 import type { AnimationConfig, EndResult, EndCallback } from './Animation';
 
 type TimingAnimationConfig =  AnimationConfig & {
