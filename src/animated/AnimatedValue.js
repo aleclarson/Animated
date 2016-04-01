@@ -10,18 +10,17 @@
  */
 'use strict';
 
-var AnimatedWithChildren = require('./AnimatedWithChildren');
-var InteractionManager = require('./injectable/InteractionManager');
-var AnimatedInterpolation = require('./AnimatedInterpolation');
 var Interpolation = require('Interpolation');
-var Animation = require('./Animation');
-var guid = require('./guid');
+var Event = require('event');
 var Set = require('es6-set');
 
-import type { EndCallback } from './Animation';
-import type { InterpolationConfigType } from 'Interpolation';
+var Animation = require('../animations/Animation');
+var AnimatedInterpolation = require('./AnimatedInterpolation');
+var AnimatedWithChildren = require('./AnimatedWithChildren');
+var InteractionManager = require('../injectable/InteractionManager');
 
-export type ValueListenerCallback = (state: {value: number}) => void;
+import type { EndCallback } from '../animations/Animation';
+import type { InterpolationConfigType } from 'Interpolation';
 
 /**
  * Animated works by building a directed acyclic graph of dependencies
@@ -65,18 +64,18 @@ function _flush(rootNode: AnimatedValue): void {
  * or calling `setValue`) will stop any previous ones.
  */
 class AnimatedValue extends AnimatedWithChildren {
+  didSet: Event;
   _value: number;
   _offset: number;
   _animation: ?Animation;
   _tracking: ?Animated;
-  _listeners: {[key: string]: ValueListenerCallback};
 
   constructor(value: number) {
     super();
+
+    this.didSet = Event();
     this._value = value;
     this._offset = 0;
-    this._animation = null;
-    this._listeners = {};
   }
 
   __detach() {
@@ -118,33 +117,16 @@ class AnimatedValue extends AnimatedWithChildren {
   }
 
   /**
-   * Adds an asynchronous listener to the value so you can observe updates from
-   * animations.  This is useful because there is no way to
-   * synchronously read the value because it might be driven natively.
-   */
-  addListener(callback: ValueListenerCallback): string {
-    var id = guid();
-    this._listeners[id] = callback;
-    return id;
-  }
-
-  removeListener(id: string): void {
-    delete this._listeners[id];
-  }
-
-  removeAllListeners(): void {
-    this._listeners = {};
-  }
-
-  /**
    * Stops any running animation or tracking.  `callback` is invoked with the
    * final value after stopping the animation, which is useful for updating
    * state to match the animation position with layout.
    */
-  stopAnimation(callback?: ?(value: number) => void): void {
+  stopAnimation(callback?: (value: number) => void): void {
     this.stopTracking();
-    this._animation && this._animation.stop();
-    this._animation = null;
+    if (this._animation) {
+      this._animation.stop();
+      this._animation = null;
+    }
     callback && callback(this.__getValue());
   }
 
@@ -160,7 +142,7 @@ class AnimatedValue extends AnimatedWithChildren {
    * Typically only used internally, but could be used by a custom Animation
    * class.
    */
-  animate(animation: Animation, callback: ?EndCallback): void {
+  animate(animation: Animation, callback?: EndCallback): void {
     var handle = null;
     if (animation.__isInteraction) {
       handle = InteractionManager.current.createInteractionHandle();
@@ -203,9 +185,7 @@ class AnimatedValue extends AnimatedWithChildren {
   _updateValue(value: number): void {
     this._value = value;
     _flush(this);
-    for (var key in this._listeners) {
-      this._listeners[key]({value: this.__getValue()});
-    }
+    this.didSet.emit(this.__getValue());
   }
 }
 

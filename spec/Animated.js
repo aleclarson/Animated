@@ -130,7 +130,7 @@ describe('Animated', () => {
     expect(callback).toBeCalled();
   });
 
-  it('send toValue when a spring stops', () => {
+  it('send endValue when a spring stops', () => {
     var anim = new Animated.Value(0);
     var listener = jest.genMockFunction();
     anim.addListener(listener);

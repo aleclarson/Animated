@@ -10,11 +10,13 @@
  */
 'use strict';
 
-var AnimatedWithChildren = require('./AnimatedWithChildren');
-var Animated = require('./Animated');
-var AnimatedValue = require('./AnimatedValue');
 var Interpolation = require('Interpolation');
+var isNumber = require('isNumber');
+
 var AnimatedInterpolation = require('./AnimatedInterpolation');
+var AnimatedWithChildren = require('./AnimatedWithChildren');
+var AnimatedValue = require('./AnimatedValue');
+var Animated = require('./Animated');
 
 import type { InterpolationConfigType } from 'Interpolation';
 
@@ -24,8 +26,8 @@ class AnimatedAddition extends AnimatedWithChildren {
 
   constructor(a: Animated | number, b: Animated | number) {
     super();
-    this._a = typeof a === 'number' ? new AnimatedValue(a) : a;
-    this._b = typeof b === 'number' ? new AnimatedValue(b) : b;
+    this._a = isNumber(a) ? new AnimatedValue(a) : a;
+    this._b = isNumber(b) ? new AnimatedValue(b) : b;
   }
 
   __getValue(): number {

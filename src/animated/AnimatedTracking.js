@@ -18,16 +18,16 @@ import type { EndCallback } from './Animated';
 class AnimatedTracking extends Animated {
   _value: AnimatedValue;
   _parent: Animated;
-  _callback: ?EndCallback;
-  _animationConfig: Object;
   _animationClass: any;
+  _animationConfig: Object;
+  _callback: ?EndCallback;
 
   constructor(
     value: AnimatedValue,
     parent: Animated,
     animationClass: any,
     animationConfig: Object,
-    callback?: ?EndCallback,
+    callback?: EndCallback,
   ) {
     super();
     this._value = value;
@@ -53,7 +53,7 @@ class AnimatedTracking extends Animated {
   update(): void {
     this._value.animate(new this._animationClass({
       ...this._animationConfig,
-      toValue: (this._animationConfig.toValue: any).__getValue(),
+      endValue: (this._animationConfig.endValue: any).__getValue(),
     }), this._callback);
   }
 }

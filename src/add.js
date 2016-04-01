@@ -10,8 +10,12 @@
  */
 'use strict';
 
-var _uniqueId = 0;
+var Animated = require('./animated/Animated');
+var AnimatedAddition = require('./animated/AnimatedAddition');
 
-module.exports = function uniqueId(): string {
-  return String(_uniqueId++);
+module.exports = function(
+  a: Animated,
+  b: Animated
+): AnimatedAddition {
+  return new AnimatedAddition(a, b);
 };

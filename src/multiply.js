@@ -11,9 +11,11 @@
 'use strict';
 
 var Animated = require('./animated/Animated');
+var AnimatedMultiplication = require('./animated/AnimatedMultiplication');
 
-function isAnimated(obj) {
-  return obj instanceof Animated;
-}
-
-module.exports = isAnimated;
+module.exports = function(
+  a: Animated,
+  b: Animated
+): AnimatedMultiplication {
+  return new AnimatedMultiplication(a, b);
+};

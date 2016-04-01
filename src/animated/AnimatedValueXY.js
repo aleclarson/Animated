@@ -10,13 +10,23 @@
  */
 'use strict';
 
-var Animated = require('./Animated');
-var AnimatedValue = require('./AnimatedValue');
-var AnimatedWithChildren = require('./AnimatedWithChildren');
 var invariant = require('invariant');
-var guid = require('./guid');
+var isNumber = require('isNumber');
+var Event = require('event');
 
-type ValueXYListenerCallback = (value: {x: number; y: number}) => void;
+var AnimatedWithChildren = require('./AnimatedWithChildren');
+var AnimatedValue = require('./AnimatedValue');
+var Animated = require('./Animated');
+
+type AnimatedValueXYConfig = {
+  x: number | AnimatedValue;
+  y: number | AnimatedValue;
+};
+
+type ValueXY = {
+  x: number;
+  y: number;
+};
 
 /**
  * 2D Value for driving 2D animations, such as pan gestures.  Almost identical
@@ -39,7 +49,7 @@ type ValueXYListenerCallback = (value: {x: number; y: number}) => void;
  *        onPanResponderRelease: () => {
  *          Animated.spring(
  *            this.state.pan,         // Auto-multiplexed
- *            {toValue: {x: 0, y: 0}} // Back to zero
+ *            {endValue: {x: 0, y: 0}} // Back to zero
  *          ).start();
  *        },
  *      });
@@ -59,33 +69,49 @@ type ValueXYListenerCallback = (value: {x: number; y: number}) => void;
 class AnimatedValueXY extends AnimatedWithChildren {
   x: AnimatedValue;
   y: AnimatedValue;
-  _listeners: {[key: string]: {x: string; y: string}};
+  didSet: Event;
+  _listeners: ?Array;
 
-  constructor(valueIn?: ?{x: number | AnimatedValue; y: number | AnimatedValue}) {
+  constructor(
+    config?: AnimatedValueXYConfig
+  ) {
     super();
-    var value: any = valueIn || {x: 0, y: 0};  // @flowfixme: shouldn't need `: any`
-    if (typeof value.x === 'number' && typeof value.y === 'number') {
-      this.x = new AnimatedValue(value.x);
-      this.y = new AnimatedValue(value.y);
+
+    this.didSet = Event({
+      onSetListeners: (_, listenerCount) => {
+        if (listenerCount === 0) {
+          this._listeners.forEach(listener => listener.stop());
+          this._listeners = null;
+        } else if (!this._listeners) {
+          var emit = () => this.didSet.emit(this.__getValue());
+          this._listeners = [ this.x.didSet(emit), this.y.didSet(emit) ];
+        }
+      },
+    });
+
+    if (!config) {
+      this.x = new AnimatedValue(0);
+      this.y = new AnimatedValue(0);
+    } else if (isNumber(config.x) && isNumber(config.y)) {
+      this.x = new AnimatedValue(config.x);
+      this.y = new AnimatedValue(config.y);
     } else {
       invariant(
-        value.x instanceof AnimatedValue &&
-        value.y instanceof AnimatedValue,
-        'AnimatedValueXY must be initalized with an object of numbers or ' +
-        'AnimatedValues.'
+        config.x instanceof AnimatedValue &&
+        config.y instanceof AnimatedValue,
+        'AnimatedValueXYConfig requires "x" and "y" be the same type!'
       );
-      this.x = value.x;
-      this.y = value.y;
+      this.x = config.x;
+      this.y = config.y;
     }
-    this._listeners = {};
   }
 
-  setValue(value: {x: number; y: number}) {
+  setValue(value: ValueXY) {
     this.x.setValue(value.x);
     this.y.setValue(value.y);
   }
 
-  setOffset(offset: {x: number; y: number}) {
+  setOffset(offset: ValueXY) {
     this.x.setOffset(offset.x);
     this.y.setOffset(offset.y);
   }
@@ -95,35 +121,17 @@ class AnimatedValueXY extends AnimatedWithChildren {
     this.y.flattenOffset();
   }
 
-  __getValue(): {x: number; y: number} {
+  __getValue(): ValueXY {
     return {
       x: this.x.__getValue(),
       y: this.y.__getValue(),
     };
   }
 
-  stopAnimation(callback?: ?() => number): void {
+  stopAnimation(callback?: () => number): void {
     this.x.stopAnimation();
     this.y.stopAnimation();
     callback && callback(this.__getValue());
-  }
-
-  addListener(callback: ValueXYListenerCallback): string {
-    var id = guid();
-    var jointCallback = ({value: number}) => {
-      callback(this.__getValue());
-    };
-    this._listeners[id] = {
-      x: this.x.addListener(jointCallback),
-      y: this.y.addListener(jointCallback),
-    };
-    return id;
-  }
-
-  removeListener(id: string): void {
-    this.x.removeListener(this._listeners[id].x);
-    this.y.removeListener(this._listeners[id].y);
-    delete this._listeners[id];
   }
 
   /**

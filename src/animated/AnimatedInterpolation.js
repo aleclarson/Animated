@@ -10,51 +10,57 @@
  */
 'use strict';
 
-var Animated = require('./Animated');
-var AnimatedWithChildren = require('./AnimatedWithChildren');
-var invariant = require('invariant');
 var Interpolation = require('Interpolation');
-var guid = require('./guid');
+var invariant = require('invariant');
+var isNumber = require('isNumber');
+var Event = require('event');
 
-import type { ValueListenerCallback } from './AnimatedValue';
+var AnimatedWithChildren = require('./AnimatedWithChildren');
+var Animated = require('./Animated');
+
+import type { InterpolationConfigType, EasingFunction } from 'Interpolation';
 
 class AnimatedInterpolation extends AnimatedWithChildren {
+  didSet: Event;
   _parent: Animated;
-  _interpolation: (input: number) => number | string;
-  _listeners: {[key: number]: ValueListenerCallback};
-  _parentListener: number;
+  _interpolation: EasingFunction;
+  _parentListener: ?Event.Listener;
 
-  constructor(parent: Animated, interpolation: (input: number) => number | string) {
+  constructor(
+    parent: Animated,
+    interpolation: (input: number) => number | string
+  ) {
     super();
+
+    this.didSet = Event({
+      onSetListeners: (_, listenerCount) => {
+        if (listenerCount === 0) {
+          this._parentListener.stop();
+          this._parentListener = null;
+        } else if (!this._parentListener) {
+          this._parentListener = this._parent.didSet(
+            () => this.didSet.emit(this.__getValue())
+          );
+        }
+      },
+    });
+
+    invariant(
+      this._parent.didSet instanceof Event,
+      'The given parent value cannot be interpolated!'
+    );
+
     this._parent = parent;
     this._interpolation = interpolation;
-    this._listeners = {};
   }
 
   __getValue(): number | string {
     var parentValue: number = this._parent.__getValue();
     invariant(
-      typeof parentValue === 'number',
-      'Cannot interpolate an input which is not a number.'
+      isNumber(parentValue),
+      'Only numbers can be interpolated!'
     );
     return this._interpolation(parentValue);
-  }
-
-  addListener(callback: ValueListenerCallback): string {
-    if (!this._parentListener) {
-      this._parentListener = this._parent.addListener(() => {
-        for (var key in this._listeners) {
-          this._listeners[key]({value: this.__getValue()});
-        }
-      })
-    }
-    var id = guid();
-    this._listeners[id] = callback;
-    return id;
-  }
-
-  removeListener(id: string): void {
-    delete this._listeners[id];
   }
 
   interpolate(config: InterpolationConfigType): AnimatedInterpolation {
