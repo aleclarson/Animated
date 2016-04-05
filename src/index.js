@@ -11,12 +11,19 @@
 'use strict';
 
 module.exports = {
-  Value: require('./animated/AnimatedValue'),
-  ValueXY: require('./animated/AnimatedValueXY'),
-  Map: require('./animated/AnimatedMap'),
-  Transform: require('./animated/AnimatedTransform'),
-  Style: require('./animated/AnimatedStyle'),
-  Props: require('./animated/AnimatedProps'),
+  AnimatedValue: require('./animated/AnimatedValue'),
+  AnimatedValueXY: require('./animated/AnimatedValueXY'),
+  AnimatedMap: require('./animated/AnimatedMap'),
+  AnimatedTransform: require('./animated/AnimatedTransform'),
+  AnimatedStyle: require('./animated/AnimatedStyle'),
+  AnimatedProps: require('./animated/AnimatedProps'),
+
+  Animation: require('./animations/Animation'),
+  DecayAnimation: require('./animations/DecayAnimation'),
+  SpringAnimation: require('./animations/SpringAnimation'),
+  TimingAnimation: require('./animations/TimingAnimation'),
+
+  isAnimated: require('./isAnimated'),
   decay: require('./decay'),
   timing: require('./timing'),
   spring: require('./spring'),
@@ -28,7 +35,7 @@ module.exports = {
   parallel: require('./parallel'),
   stagger: require('./stagger'),
   event: require('./event'),
-  isAnimated: require('./isAnimated'),
+
   inject: {
     ApplyAnimatedValues: require('./injectable/ApplyAnimatedValues').inject,
     InteractionManager: require('./injectable/InteractionManager').inject,

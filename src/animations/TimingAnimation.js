@@ -24,7 +24,7 @@ import type { EasingFunction } from 'Interpolation';
 
 export type TimingAnimationConfig = AnimationConfig & {
   toValue: number | AnimatedValue;
-  easing?: (value: number) => number;
+  easing?: EasingFunction;
   duration?: number;
   delay?: number;
 };
@@ -38,7 +38,7 @@ class TimingAnimation extends Animation {
   _lastValue: number;
   _delay: number;
   _duration: number;
-  _easing: (value: number) => number;
+  _easing: EasingFunction;
   _timeout: ?any;
 
   constructor(

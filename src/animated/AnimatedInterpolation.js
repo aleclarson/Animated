@@ -28,7 +28,7 @@ class AnimatedInterpolation extends AnimatedWithChildren {
 
   constructor(
     parent: Animated,
-    interpolation: (input: number) => number | string
+    interpolation: EasingFunction
   ) {
     super();
 

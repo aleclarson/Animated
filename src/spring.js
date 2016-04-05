@@ -15,6 +15,7 @@ var AnimatedTracking = require('./animated/AnimatedTracking');
 var SpringAnimation = require('./animations/SpringAnimation');
 var AnimatedValueXY = require('./animated/AnimatedValueXY');
 var AnimatedValue = require('./animated/AnimatedValue');
+var Animated = require('./animated/Animated');
 
 import type { CompositeAnimation, EndCallback } from './animations/Animation';
 import type { SpringAnimationConfig } from './animations/SpringAnimation';

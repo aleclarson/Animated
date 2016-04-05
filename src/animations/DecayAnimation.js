@@ -18,18 +18,17 @@ import type { AnimationConfig, EndCallback } from './Animation';
 
 export type DecayAnimationConfig = AnimationConfig & {
   velocity: number;
+  restVelocity?: number;
   deceleration?: number;
-  restSpeedThreshold?: number;
-  restDisplacementThreshold?: number;
+  duration?: number;
 };
 
 class DecayAnimation extends Animation {
   _startVelocity: number;
   _curValue: number;
   _curVelocity: number;
+  _restVelocity: number;
   _deceleration: number;
-  _restSpeedThreshold: number;
-  _restDisplacementThreshold: number;
 
   constructor(
     config: DecayAnimationConfig,
@@ -38,8 +37,7 @@ class DecayAnimation extends Animation {
 
     this._deceleration = withDefault(config.deceleration, 0.998);
     this._startVelocity = config.velocity;
-    this._restSpeedThreshold = withDefault(config.restSpeedThreshold, 0.001);
-    this._restDisplacementThreshold = withDefault(config.restDisplacementThreshold, 0.1);
+    this._restVelocity = withDefault(config.restVelocity, 0.005);
   }
 
   __onStart(): void {
@@ -72,19 +70,9 @@ class DecayAnimation extends Animation {
   __didComputeValue(
     value: number,
   ): void {
-    if (this._isResting()) {
+    if (Math.abs(this._curVelocity) < this._restVelocity) {
       this.__onFinish();
     }
-  }
-
-  _isResting(): bool {
-    if (Math.abs(this._curValue - this._lastValue) < this._restDisplacementThreshold) {
-      return true;
-    }
-    if (Math.abs(this._curVelocity) < this._restSpeedThreshold) {
-      return true;
-    }
-    return false;
   }
 }
 

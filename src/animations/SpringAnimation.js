@@ -58,6 +58,8 @@ class SpringAnimation extends Animation {
     var springConfig = this._getSpringConfig(config);
     this._tension = springConfig.tension;
     this._friction = springConfig.friction;
+    console.log('SpringAnimation._tension = ' + this._tension);
+    console.log('SpringAnimation._friction = ' + this._friction);
   }
 
   __onStart(): void {
@@ -167,7 +169,7 @@ class SpringAnimation extends Animation {
         isOvershooting = value < this._endValue;
       }
     }
-    var isVelocity = Math.abs(velocity) <= this._restSpeedThreshold;
+    var isVelocity = Math.abs(this._curVelocity) <= this._restSpeedThreshold;
     var isDisplacement = true;
     if (this._tension !== 0) {
       isDisplacement = Math.abs(this._endValue - value) <= this._restDisplacementThreshold;
@@ -184,17 +186,15 @@ class SpringAnimation extends Animation {
         config.tension === undefined && config.friction === undefined,
         'You can only define bounciness/speed or tension/friction but not both',
       );
-      springConfig = SpringConfig.fromBouncinessAndSpeed(
+      return SpringConfig.fromBouncinessAndSpeed(
         withDefault(config.bounciness, 8),
         withDefault(config.speed, 12),
       );
-    } else {
-      springConfig = SpringConfig.fromOrigamiTensionAndFriction(
-        withDefault(config.tension, 40),
-        withDefault(config.friction, 7),
-      );
     }
-    return springConfig;
+    return SpringConfig.fromOrigamiTensionAndFriction(
+      withDefault(config.tension, 40),
+      withDefault(config.friction, 7),
+    );
   }
 
   __onFinish(): void {
