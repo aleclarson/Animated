@@ -10,9 +10,10 @@
  */
 'use strict';
 
+require('isDev');
+
 var withDefault = require('withDefault');
 var isNumber = require('isNumber');
-var isDev = require('isDev');
 
 var RequestAnimationFrame = require('../injectable/RequestAnimationFrame');
 var CancelAnimationFrame = require('../injectable/CancelAnimationFrame');
@@ -24,6 +25,7 @@ export type EndCallback = (result: EndResult) => void;
 
 export type AnimationConfig = {
   isInteraction?: bool;
+  captureFrames?: bool;
 };
 
 export type CompositeAnimation = {
@@ -42,6 +44,7 @@ class Animation {
   __onUpdate: ?UpdateCallback;
   __onEnd: ?EndCallback;
   __isInteraction: bool;
+  __frames: ?Array;
   __animationFrame: ?any;
   __previousAnimation: ?Animation;
 
@@ -51,6 +54,7 @@ class Animation {
     this.__started = false;
     this.__active = false;
     this.__isInteraction = withDefault(config.isInteraction, true);
+    this.__frames = config.captureFrames ? [] : null;
     this.__boundRecompute = () => this.__recomputeValue();
   }
 
@@ -70,7 +74,12 @@ class Animation {
     this.__previousAnimation = previousAnimation;
     this.__active = true;
     this.__onStart();
-    this.__previousAnimation = null;
+    if (this.__frames) {
+       var frame = this.__captureFrame();
+       if (frame) {
+         this.__frames.push(frame);
+       }
+     }
   }
 
   stop(): void {
@@ -79,36 +88,6 @@ class Animation {
     this.__animationFrame = null;
     this.__onStop();
     this.__debouncedOnEnd(false);
-  }
-
-  __computeValue(): number {
-    return this.__startValue;
-  }
-
-  __didComputeValue(
-    value: number
-  ): void {
-    // no-op
-  }
-
-  __recomputeValue(): void {
-
-    var value = this.__computeValue();
-
-    if (isDev && !isNumber(this._curValue)) {
-      throw TypeError('Animation.__computeValue() must return a number!');
-    }
-
-    this.__onUpdate(value);
-    this.__didComputeValue(value);
-
-    this.__requestAnimationFrame();
-  }
-
-  __requestAnimationFrame(): void {
-    if (this.__active) {
-      this.__animationFrame = RequestAnimationFrame.current(this.__boundRecompute);
-    }
   }
 
   __onStart(): void {
@@ -121,6 +100,48 @@ class Animation {
 
   __onFinish(): void {
     this.__debouncedOnEnd(true);
+  }
+
+  __recomputeValue(): void {
+
+    var value = this.__computeValue();
+
+    if (isDev && !isNumber(value)) {
+      throw TypeError('Animation.__computeValue() must return a number!');
+    }
+
+    this.__onUpdate(value);
+
+    // This method is typically used to check if the animation is finished.
+    this.__didComputeValue(value);
+
+    this.__requestAnimationFrame();
+    if (this.__frames) {
+      var frame = this.__captureFrame();
+      if (frame) {
+        this.__frames.push(frame);
+      }
+    }
+  }
+
+  __computeValue(): number {
+    return this.__startValue;
+  }
+
+  __didComputeValue(
+    value: number
+  ): void {
+    // no-op
+  }
+
+  __captureFrame(): ?Object {
+    // no-op
+  }
+
+  __requestAnimationFrame(): void {
+    if (this.__active) {
+      this.__animationFrame = RequestAnimationFrame.current(this.__boundRecompute);
+    }
   }
 
   __debouncedOnEnd(finished: bool): void {

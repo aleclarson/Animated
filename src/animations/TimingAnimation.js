@@ -12,7 +12,6 @@
 
 var withDefault = require('withDefault');
 var Easing = require('easing');
-var isDev = require('isDev');
 
 var Animation = require('./Animation');
 var AnimatedValue = require('../animated/AnimatedValue');
