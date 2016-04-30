@@ -1,0 +1,17 @@
+{
+  "name": "Animated",
+  "version": "1.0.1",
+  "description": "Declarative Animations Library for React and React Native",
+  "main": "src/index.js",
+  "dependencies": {
+    "Interpolation": "aleclarson/Interpolation#1.0.0",
+    "easing": "aleclarson/easing#1.0.0",
+    "es6-set": "^0.1.4",
+    "event": "aleclarson/event#1.0.0",
+    "invariant": "^2.2.0",
+    "isDev": "aleclarson/isDev#1.0.0",
+    "isNumber": "aleclarson/isNumber#1.0.0",
+    "tinycolor": "0.0.1",
+    "withDefault": "aleclarson/withDefault#1.0.0"
+  }
+}
