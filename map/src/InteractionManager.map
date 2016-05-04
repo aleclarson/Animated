@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "InteractionManager.js",
+  "sourceRoot": "../../src",
+  "sources": [
+    "InteractionManager.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA,IAAA;;AAAA,aAAA,GAAgB,OAAA,CAAQ,eAAR;;AAChB,UAAA,GAAa,OAAA,CAAQ,YAAR;;AAEb,MAAM,CAAC,OAAP,GAAiB,UAAU,CAAC,GAAX,CAEf;EAAA,KAAA,EAAO;IACL,YAAA,EAAc,QADT;IAEL,WAAA,EAAa,QAFR;GAAP;EAKA,MAAA,EAAQ;IACN,YAAA,EAAc,aADR;IAEN,WAAA,EAAa,aAFP;GALR;CAFe"
+}
