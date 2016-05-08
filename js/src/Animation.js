@@ -1,8 +1,10 @@
-var Animation, AnimationFrame, configTypes, emptyFunction, type;
+var Animation, AnimationFrame, Type, configTypes, emptyFunction, type;
 
 require("isDev");
 
 emptyFunction = require("emptyFunction");
+
+Type = require("Type");
 
 AnimationFrame = require("./AnimationFrame");
 
@@ -19,8 +21,7 @@ type = Type("Animation");
 
 type.optionTypes = {
   isInteraction: Boolean,
-  captureFrames: Boolean,
-  onStop: Function.Maybe
+  captureFrames: Boolean
 };
 
 type.optionDefaults = {

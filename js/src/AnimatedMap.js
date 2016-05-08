@@ -1,6 +1,6 @@
 var Animated, Type, type;
 
-Type = require("type");
+Type = require("Type");
 
 Animated = require("./Animated");
 

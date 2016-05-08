@@ -1,5 +1,5 @@
 
-Type = require "type"
+Type = require "Type"
 
 Animated = require "./Animated"
 

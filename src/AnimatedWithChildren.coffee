@@ -1,4 +1,6 @@
 
+Type = require "Type"
+
 Animated = require "./Animated"
 
 type = Type "AnimatedWithChildren"

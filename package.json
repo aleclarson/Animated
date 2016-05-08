@@ -1,17 +1,15 @@
 {
   "name": "Animated",
   "version": "2.0.0",
-  "main": "js/src/Animated",
+  "main": "js/src/index",
   "dependencies": {
-    "Interpolation": "aleclarson/Interpolation#1.0.0",
-    "easing": "aleclarson/easing#1.0.0",
     "es6-set": "^0.1.4",
     "event": "aleclarson/event#1.0.0",
-    "invariant": "^2.2.0",
     "isDev": "aleclarson/isDev#1.0.0",
-    "isNumber": "aleclarson/isNumber#1.0.0",
-    "tinycolor": "0.0.1",
-    "withDefault": "aleclarson/withDefault#1.0.0"
+    "emptyFunction": "aleclarson/emptyFunction#1.0.0",
+    "Type": "aleclarson/Type#1.0.0",
+    "type-utils": "aleclarson/type-utils#1.0.0",
+    "Injectable": "aleclarson/Injectable#1.0.0"
   },
   "lotus": {
     "plugins": [

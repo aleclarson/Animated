@@ -1,8 +1,10 @@
-var AnimatedWithChildren, Animation, Event, InteractionManager, Set, assertType, type;
+var AnimatedWithChildren, Animation, Event, InteractionManager, Set, Type, assertType, type;
 
 assertType = require("type-utils").assertType;
 
 Event = require("event");
+
+Type = require("Type");
 
 Set = require("es6-set");
 

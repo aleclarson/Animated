@@ -2,6 +2,7 @@
 { assertType } = require "type-utils"
 
 Event = require "event"
+Type = require "Type"
 Set = require "es6-set"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"

@@ -2,6 +2,7 @@
 require "isDev"
 
 emptyFunction = require "emptyFunction"
+Type = require "Type"
 
 AnimationFrame = require "./AnimationFrame"
 
@@ -19,7 +20,6 @@ type = Type "Animation"
 type.optionTypes =
   isInteraction: Boolean
   captureFrames: Boolean
-  onStop: Function.Maybe
 
 type.optionDefaults =
   isInteraction: yes
