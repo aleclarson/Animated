@@ -1,6 +1,6 @@
 var AnimatedWithChildren, Animation, Event, InteractionManager, Set, Type, assertType, type;
 
-assertType = require("type-utils").assertType;
+assertType = require("assertType");
 
 Event = require("event");
 

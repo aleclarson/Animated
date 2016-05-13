@@ -1,6 +1,5 @@
 
-{ assertType } = require "type-utils"
-
+assertType = require "assertType"
 Event = require "event"
 Type = require "Type"
 Set = require "es6-set"
