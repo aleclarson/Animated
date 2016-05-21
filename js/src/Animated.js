@@ -6,24 +6,15 @@ Type = require("Type");
 
 type = Type("Animated");
 
+type.mustOverride(["__attach", "__detach", "__getValue"]);
+
 type.defineMethods({
-  __attach: function() {
-    throw Error("Must override 'Animated::__attach'!");
-  },
-  __detach: function() {
-    throw Error("Must override 'Animated::__detach'!");
-  },
-  __getValue: function() {
-    throw Error("Must override 'Animated::__getValue'!");
-  },
   __getAnimatedValue: function() {
     return this.__getValue();
   },
   __addChild: emptyFunction,
   __removeChild: emptyFunction,
-  __getChildren: function() {
-    return [];
-  }
+  __getChildren: emptyFunction.thatReturns([])
 });
 
 module.exports = type.build();

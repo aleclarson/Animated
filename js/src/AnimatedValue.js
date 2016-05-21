@@ -1,18 +1,18 @@
-var AnimatedWithChildren, Animation, Event, InteractionManager, Set, Type, assertType, type;
+var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, type;
 
 assertType = require("assertType");
+
+Immutable = require("immutable");
 
 Event = require("event");
 
 Type = require("Type");
 
-Set = require("es6-set");
-
 AnimatedWithChildren = require("./AnimatedWithChildren");
 
-InteractionManager = require("./InteractionManager");
-
 Animation = require("./Animation");
+
+InteractionManager = require("./inject/InteractionManager").get();
 
 type = Type("AnimatedValue");
 
@@ -91,27 +91,35 @@ type.defineMethods({
     if (!animation.__isInteraction) {
       return null;
     }
-    return InteractionManager.createHandle();
+    return InteractionManager.createInteractionHandle();
   },
   _clearInteraction: function(handle) {
     if (!handle) {
       return;
     }
-    return InteractionManager.clearHandle(handle);
+    return InteractionManager.clearInteractionHandle(handle);
   },
   _flush: function() {
-    var animatedStyles;
-    animatedStyles = new Set;
-    this._findAnimatedStyles(this);
-    return animatedStyles.forEach(function(animatedStyle) {
-      return animatedStyle.update();
+    var leaves;
+    leaves = Immutable.Set().withMutations((function(_this) {
+      return function(leaves) {
+        return _this._rake(leaves, _this);
+      };
+    })(this));
+    return leafNodes.forEach(function(node) {
+      return node.update();
     });
   },
-  _findAnimatedStyles: function(node) {
+  _rake: function(leaves, node) {
+    var i, len, ref;
     if (node.update) {
-      return animatedStyles.add(node);
-    } else {
-      return node.__getChildren().forEach(this._findAnimatedStyles);
+      leaves.add(node);
+      return;
+    }
+    ref = node.__getChildren();
+    for (i = 0, len = ref.length; i < len; i++) {
+      node = ref[i];
+      this._rake(leaves, node);
     }
   },
   __detach: function() {

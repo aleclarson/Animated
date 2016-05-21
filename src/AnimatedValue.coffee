@@ -1,12 +1,13 @@
 
 assertType = require "assertType"
+Immutable = require "immutable"
 Event = require "event"
 Type = require "Type"
-Set = require "es6-set"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
-InteractionManager = require "./InteractionManager"
 Animation = require "./Animation"
+
+InteractionManager = require("./inject/InteractionManager").get()
 
 type = Type "AnimatedValue"
 
@@ -76,21 +77,33 @@ type.defineMethods
 
   _createInteraction: (animation) ->
     return null unless animation.__isInteraction
-    InteractionManager.createHandle()
+    InteractionManager.createInteractionHandle()
 
   _clearInteraction: (handle) ->
     return unless handle
-    InteractionManager.clearHandle handle
+    InteractionManager.clearInteractionHandle handle
 
+  # Updates every 'Animated' instance
+  # that has an 'update' function.
   _flush: ->
-    animatedStyles = new Set
-    @_findAnimatedStyles this
-    animatedStyles.forEach (animatedStyle) ->
-      animatedStyle.update()
 
-  _findAnimatedStyles: (node) ->
-    if node.update then animatedStyles.add node
-    else node.__getChildren().forEach @_findAnimatedStyles
+    leaves = Immutable.Set().withMutations (leaves) =>
+      @_rake leaves, this
+
+    leafNodes.forEach (node) ->
+      node.update()
+
+  # Gathers every 'Animated' instance
+  # that has an 'update' function.
+  _rake: (leaves, node) ->
+
+    if node.update
+      leaves.add node
+      return
+
+    for node in node.__getChildren()
+      @_rake leaves, node
+    return
 
   __detach: ->
     @stopAnimation()

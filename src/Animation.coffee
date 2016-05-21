@@ -4,7 +4,8 @@ require "isDev"
 emptyFunction = require "emptyFunction"
 Type = require "Type"
 
-AnimationFrame = require "./AnimationFrame"
+requestAnimationFrame = require("./inject/requestAnimationFrame").get()
+cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
 
 if isDev
 
@@ -117,11 +118,11 @@ type.defineMethods
 
   _requestAnimationFrame: ->
     return if @_animationFrame
-    @_animationFrame = AnimationFrame.requestFrame @_recomputeValue
+    @_animationFrame = requestAnimationFrame @_recomputeValue
 
   _cancelAnimationFrame: ->
     return unless @_animationFrame
-    AnimationFrame.clearFrame @_animationFrame
+    clearAnimationFrame @_animationFrame
     @_animationFrame = null
 
   _captureFrame: ->

@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "InteractionManager.js",
+  "sourceRoot": "../../../src/inject",
+  "sources": [
+    "InteractionManager.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA,IAAA;;AAAA,aAAA,GAAgB,OAAA,CAAQ,eAAR;;AAChB,UAAA,GAAa,OAAA,CAAQ,YAAR;;AAEb,MAAM,CAAC,OAAP,GAAiB,UAAA,CAAW;EAC1B,YAAA,EAAc,aADY;EAE1B,WAAA,EAAa,aAFa;CAAX"
+}

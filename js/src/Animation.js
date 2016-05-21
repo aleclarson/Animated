@@ -1,4 +1,4 @@
-var Animation, AnimationFrame, Type, configTypes, emptyFunction, type;
+var Animation, Type, cancelAnimationFrame, configTypes, emptyFunction, requestAnimationFrame, type;
 
 require("isDev");
 
@@ -6,7 +6,9 @@ emptyFunction = require("emptyFunction");
 
 Type = require("Type");
 
-AnimationFrame = require("./AnimationFrame");
+requestAnimationFrame = require("./inject/requestAnimationFrame").get();
+
+cancelAnimationFrame = require("./inject/cancelAnimationFrame").get();
 
 if (isDev) {
   configTypes = {};
@@ -113,13 +115,13 @@ type.defineMethods({
     if (this._animationFrame) {
       return;
     }
-    return this._animationFrame = AnimationFrame.requestFrame(this._recomputeValue);
+    return this._animationFrame = requestAnimationFrame(this._recomputeValue);
   },
   _cancelAnimationFrame: function() {
     if (!this._animationFrame) {
       return;
     }
-    AnimationFrame.clearFrame(this._animationFrame);
+    clearAnimationFrame(this._animationFrame);
     return this._animationFrame = null;
   },
   _captureFrame: function() {

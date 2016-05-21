@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "cancelAnimationFrame.js",
+  "sourceRoot": "../../../src/inject",
+  "sources": [
+    "cancelAnimationFrame.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA,IAAA;;AAAA,UAAA,GAAa,OAAA,CAAQ,YAAR;;AAEb,MAAM,CAAC,OAAP,GAAiB,UAAA,CAAW,SAAC,EAAD;SAC1B,MAAM,CAAC,oBAAP,CAA4B,EAA5B;AAD0B,CAAX"
+}
