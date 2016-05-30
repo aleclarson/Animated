@@ -1,5 +1,6 @@
 
 assertType = require "assertType"
+getArgProp = require "getArgProp"
 Immutable = require "immutable"
 Event = require "event"
 Type = require "Type"
@@ -17,7 +18,7 @@ type.defineValues
 
   didSet: -> Event()
 
-  _value: (value) -> value
+  _value: getArgProp 0
 
   _animation: null
 
@@ -45,7 +46,7 @@ type.defineMethods
 
   animate: (animation, onEnd) ->
 
-    assertType animation, Animation
+    assertType animation, Animation.Kind
 
     handle = @_createInteraction animation
 
@@ -90,7 +91,7 @@ type.defineMethods
     leaves = Immutable.Set().withMutations (leaves) =>
       @_rake leaves, this
 
-    leafNodes.forEach (node) ->
+    leaves.forEach (node) ->
       node.update()
 
   # Gathers every 'Animated' instance

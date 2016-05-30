@@ -2,6 +2,9 @@
 require "isDev"
 
 emptyFunction = require "emptyFunction"
+assertTypes = require "assertTypes"
+assertType = require "assertType"
+getArgProp = require "getArgProp"
 Type = require "Type"
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get()
@@ -45,7 +48,7 @@ type.defineValues
 
   _hasEnded: no
 
-  _isInteraction: (options) -> options.isInteraction
+  _isInteraction: getArgProp "isInteraction"
 
   _animationFrame: null
 
@@ -59,24 +62,12 @@ type.defineValues
 
 type.defineMethods
 
-  __onStart: ->
-    @_requestAnimationFrame()
-
-  __onEnd: emptyFunction
-
-  __captureFrame: emptyFunction
-
-  __computeValue: ->
-    throw Error "Must override 'Animation::__computeValue'!"
-
-  __didComputeValue: emptyFunction
-
   start: (config) ->
 
     return if @_hasStarted
     @_hasStarted = yes
 
-    validateTypes config, configTypes.start if isDev
+    assertTypes config, configTypes.start if isDev
 
     @startTime = Date.now()
     @startValue = config.startValue
@@ -84,7 +75,7 @@ type.defineMethods
     @_onUpdate = config.onUpdate
     @_onEnd = config.onEnd
 
-    if isType previousAnimation, Animation.Kind
+    if config.previousAnimation instanceof Animation
       @_previousAnimation = config.previousAnimation
 
     @__onStart()
@@ -121,13 +112,25 @@ type.defineMethods
     @_animationFrame = requestAnimationFrame @_recomputeValue
 
   _cancelAnimationFrame: ->
-    return unless @_animationFrame
-    clearAnimationFrame @_animationFrame
+    return if not @_animationFrame
+    cancelAnimationFrame @_animationFrame
     @_animationFrame = null
 
   _captureFrame: ->
-    return unless @_frames
+    return if not @_frames
     frame = @__captureFrame()
     @_frames.push frame if frame
+
+  __onStart: -> @_requestAnimationFrame()
+
+  __onEnd: emptyFunction
+
+  __captureFrame: emptyFunction
+
+  __didComputeValue: emptyFunction
+
+type.mustOverride [
+  "__computeValue"
+]
 
 module.exports = Animation = type.build()

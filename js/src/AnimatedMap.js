@@ -1,4 +1,6 @@
-var Animated, Type, type;
+var Animated, Type, getArgProp, type;
+
+getArgProp = require("getArgProp");
 
 Type = require("Type");
 
@@ -14,12 +16,8 @@ type.argumentTypes = {
 };
 
 type.defineFrozenValues({
-  _values: function(values) {
-    return values;
-  },
-  _onUpdate: function(_, onUpdate) {
-    return onUpdate;
-  }
+  _values: getArgProp(0),
+  _onUpdate: getArgProp(1)
 });
 
 type.initInstance(function() {

@@ -1,8 +1,14 @@
-var Animation, Type, cancelAnimationFrame, configTypes, emptyFunction, requestAnimationFrame, type;
+var Animation, Type, assertType, assertTypes, cancelAnimationFrame, configTypes, emptyFunction, getArgProp, requestAnimationFrame, type;
 
 require("isDev");
 
 emptyFunction = require("emptyFunction");
+
+assertTypes = require("assertTypes");
+
+assertType = require("assertType");
+
+getArgProp = require("getArgProp");
 
 Type = require("Type");
 
@@ -40,9 +46,7 @@ type.defineValues({
   startValue: null,
   _hasStarted: false,
   _hasEnded: false,
-  _isInteraction: function(options) {
-    return options.isInteraction;
-  },
+  _isInteraction: getArgProp("isInteraction"),
   _animationFrame: null,
   _previousAnimation: null,
   _onUpdate: null,
@@ -55,28 +59,19 @@ type.defineValues({
 });
 
 type.defineMethods({
-  __onStart: function() {
-    return this._requestAnimationFrame();
-  },
-  __onEnd: emptyFunction,
-  __captureFrame: emptyFunction,
-  __computeValue: function() {
-    throw Error("Must override 'Animation::__computeValue'!");
-  },
-  __didComputeValue: emptyFunction,
   start: function(config) {
     if (this._hasStarted) {
       return;
     }
     this._hasStarted = true;
     if (isDev) {
-      validateTypes(config, configTypes.start);
+      assertTypes(config, configTypes.start);
     }
     this.startTime = Date.now();
     this.startValue = config.startValue;
     this._onUpdate = config.onUpdate;
     this._onEnd = config.onEnd;
-    if (isType(previousAnimation, Animation.Kind)) {
+    if (config.previousAnimation instanceof Animation) {
       this._previousAnimation = config.previousAnimation;
     }
     this.__onStart();
@@ -121,7 +116,7 @@ type.defineMethods({
     if (!this._animationFrame) {
       return;
     }
-    clearAnimationFrame(this._animationFrame);
+    cancelAnimationFrame(this._animationFrame);
     return this._animationFrame = null;
   },
   _captureFrame: function() {
@@ -133,8 +128,16 @@ type.defineMethods({
     if (frame) {
       return this._frames.push(frame);
     }
-  }
+  },
+  __onStart: function() {
+    return this._requestAnimationFrame();
+  },
+  __onEnd: emptyFunction,
+  __captureFrame: emptyFunction,
+  __didComputeValue: emptyFunction
 });
+
+type.mustOverride(["__computeValue"]);
 
 module.exports = Animation = type.build();
 

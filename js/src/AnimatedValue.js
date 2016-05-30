@@ -1,6 +1,8 @@
-var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, type;
+var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, getArgProp, type;
 
 assertType = require("assertType");
+
+getArgProp = require("getArgProp");
 
 Immutable = require("immutable");
 
@@ -22,9 +24,7 @@ type.defineValues({
   didSet: function() {
     return Event();
   },
-  _value: function(value) {
-    return value;
-  },
+  _value: getArgProp(0),
   _animation: null,
   _tracking: null
 });
@@ -49,7 +49,7 @@ type.defineMethods({
   },
   animate: function(animation, onEnd) {
     var handle, previousAnimation;
-    assertType(animation, Animation);
+    assertType(animation, Animation.Kind);
     handle = this._createInteraction(animation);
     previousAnimation = this._animation;
     if (previousAnimation) {
@@ -106,7 +106,7 @@ type.defineMethods({
         return _this._rake(leaves, _this);
       };
     })(this));
-    return leafNodes.forEach(function(node) {
+    return leaves.forEach(function(node) {
       return node.update();
     });
   },
