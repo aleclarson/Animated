@@ -121,7 +121,10 @@ type.defineMethods({
       node = ref[i];
       this._rake(leaves, node);
     }
-  },
+  }
+});
+
+type.overrideMethods({
   __detach: function() {
     return this.stopAnimation();
   },

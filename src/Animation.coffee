@@ -10,15 +10,6 @@ Type = require "Type"
 requestAnimationFrame = require("./inject/requestAnimationFrame").get()
 cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
 
-if isDev
-
-  configTypes = {}
-
-  configTypes.start =
-    startValue: Number
-    onUpdate: Function
-    onEnd: Function
-
 type = Type "Animation"
 
 type.optionTypes =
@@ -67,7 +58,10 @@ type.defineMethods
     return if @_hasStarted
     @_hasStarted = yes
 
-    assertTypes config, configTypes.start if isDev
+    assertTypes config,
+      startValue: Number
+      onUpdate: Function
+      onEnd: Function
 
     @startTime = Date.now()
     @startValue = config.startValue
@@ -108,13 +102,15 @@ type.defineMethods
     @_captureFrame()
 
   _requestAnimationFrame: ->
-    return if @_animationFrame
-    @_animationFrame = requestAnimationFrame @_recomputeValue
+    if not @_animationFrame
+      @_animationFrame = requestAnimationFrame @_recomputeValue
+    return
 
   _cancelAnimationFrame: ->
-    return if not @_animationFrame
-    cancelAnimationFrame @_animationFrame
-    @_animationFrame = null
+    if @_animationFrame
+      cancelAnimationFrame @_animationFrame
+      @_animationFrame = null
+    return
 
   _captureFrame: ->
     return if not @_frames

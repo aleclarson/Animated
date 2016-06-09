@@ -27,6 +27,8 @@ type.defineMethods
   update: ->
     @_callback()
 
+type.overrideMethods
+
   __getValue: ->
     values = {}
     for key, value of @_values

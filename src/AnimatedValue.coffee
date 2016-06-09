@@ -106,6 +106,8 @@ type.defineMethods
       @_rake leaves, node
     return
 
+type.overrideMethods
+
   __detach: ->
     @stopAnimation()
 

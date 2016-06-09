@@ -1,4 +1,4 @@
-var Animation, Type, assertType, assertTypes, cancelAnimationFrame, configTypes, emptyFunction, getArgProp, requestAnimationFrame, type;
+var Animation, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, getArgProp, requestAnimationFrame, type;
 
 require("isDev");
 
@@ -15,15 +15,6 @@ Type = require("Type");
 requestAnimationFrame = require("./inject/requestAnimationFrame").get();
 
 cancelAnimationFrame = require("./inject/cancelAnimationFrame").get();
-
-if (isDev) {
-  configTypes = {};
-  configTypes.start = {
-    startValue: Number,
-    onUpdate: Function,
-    onEnd: Function
-  };
-}
 
 type = Type("Animation");
 
@@ -64,9 +55,11 @@ type.defineMethods({
       return;
     }
     this._hasStarted = true;
-    if (isDev) {
-      assertTypes(config, configTypes.start);
-    }
+    assertTypes(config, {
+      startValue: Number,
+      onUpdate: Function,
+      onEnd: Function
+    });
     this.startTime = Date.now();
     this.startValue = config.startValue;
     this._onUpdate = config.onUpdate;
@@ -107,17 +100,15 @@ type.defineMethods({
     return this._captureFrame();
   },
   _requestAnimationFrame: function() {
-    if (this._animationFrame) {
-      return;
+    if (!this._animationFrame) {
+      this._animationFrame = requestAnimationFrame(this._recomputeValue);
     }
-    return this._animationFrame = requestAnimationFrame(this._recomputeValue);
   },
   _cancelAnimationFrame: function() {
-    if (!this._animationFrame) {
-      return;
+    if (this._animationFrame) {
+      cancelAnimationFrame(this._animationFrame);
+      this._animationFrame = null;
     }
-    cancelAnimationFrame(this._animationFrame);
-    return this._animationFrame = null;
   },
   _captureFrame: function() {
     var frame;

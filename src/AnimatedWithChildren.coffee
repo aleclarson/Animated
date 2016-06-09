@@ -11,7 +11,7 @@ type.defineFrozenValues
 
   _children: -> []
 
-type.defineMethods
+type.overrideMethods
 
   __getChildren: ->
     @_children

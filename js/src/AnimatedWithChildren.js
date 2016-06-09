@@ -14,7 +14,7 @@ type.defineFrozenValues({
   }
 });
 
-type.defineMethods({
+type.overrideMethods({
   __getChildren: function() {
     return this._children;
   },

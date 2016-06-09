@@ -27,7 +27,10 @@ type.initInstance(function() {
 type.defineMethods({
   update: function() {
     return this._callback();
-  },
+  }
+});
+
+type.overrideMethods({
   __getValue: function() {
     var key, ref, value, values;
     values = {};
