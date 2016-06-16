@@ -6,7 +6,7 @@ getArgProp = require("getArgProp");
 
 Immutable = require("immutable");
 
-Event = require("event");
+Event = require("Event");
 
 Type = require("Type");
 

@@ -24,11 +24,17 @@ animation.stop()
 # Jump to the final value.
 animation.finish()
 
+# Equals true when `animation.start()` has been called.
+animation.hasStarted
+
 # The starting value passed to 'this.start()'.
 animation.startValue
 
 # When the animation started.
 animation.startTime
+
+# Equals true when the animation has been stopped or finished.
+animation.hasEnded
 ```
 
 ### Subclassing
@@ -45,8 +51,8 @@ __computeValue: ->
 # This function is called immediately after 'this._onUpdate' is passed
 # the newest value. One reason to override this is to call 'this.finish'
 # if the newest value equals the final value.
-__didComputeValue: (newValue) ->
-  @_hasEnded = yes if newValue is finalValue
+__didUpdate: (newValue) ->
+  @finish() if newValue is finalValue
 
 # This function is called inside 'this.start()'.
 # NOTE: If you override this, you must call 'this._requestAnimationFrame()'!

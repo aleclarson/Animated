@@ -49,7 +49,11 @@ type.defineValues
 
   _onEnd: null
 
-  _frames: (options) -> [] if options.captureFrames
+  _frames: (options) ->
+    [] if options.captureFrames
+
+  _captureFrame: (options) ->
+    emptyFunction if not options.captureFrames
 
 type.defineMethods
 
@@ -72,7 +76,7 @@ type.defineMethods
     if config.previousAnimation instanceof Animation
       @_previousAnimation = config.previousAnimation
 
-    @__onStart()
+    @__didStart()
     @_captureFrame()
     return
 
@@ -86,16 +90,18 @@ type.defineMethods
     return if @_hasEnded
     @_hasEnded = yes
     @_cancelAnimationFrame()
-    @__onEnd finished
+    @__didEnd finished
 
   _recomputeValue: ->
 
+    @_animationFrame = null
     return if @_hasEnded
+
     value = @__computeValue()
     assertType value, Number
 
     @_onUpdate value
-    @__didComputeValue value
+    @__didUpdate value
 
     return if @_hasEnded
     @_requestAnimationFrame()
@@ -113,17 +119,17 @@ type.defineMethods
     return
 
   _captureFrame: ->
-    return if not @_frames
     frame = @__captureFrame()
-    @_frames.push frame if frame
+    assertType frame, Object
+    @_frames.push frame
 
-  __onStart: -> @_requestAnimationFrame()
+  __didStart: -> @_requestAnimationFrame()
 
-  __onEnd: emptyFunction
+  __didEnd: emptyFunction
+
+  __didUpdate: emptyFunction
 
   __captureFrame: emptyFunction
-
-  __didComputeValue: emptyFunction
 
 type.mustOverride [
   "__computeValue"

@@ -46,6 +46,11 @@ type.defineValues({
     if (options.captureFrames) {
       return [];
     }
+  },
+  _captureFrame: function(options) {
+    if (!options.captureFrames) {
+      return emptyFunction;
+    }
   }
 });
 
@@ -67,7 +72,7 @@ type.defineMethods({
     if (config.previousAnimation instanceof Animation) {
       this._previousAnimation = config.previousAnimation;
     }
-    this.__onStart();
+    this.__didStart();
     this._captureFrame();
   },
   stop: function() {
@@ -82,17 +87,18 @@ type.defineMethods({
     }
     this._hasEnded = true;
     this._cancelAnimationFrame();
-    return this.__onEnd(finished);
+    return this.__didEnd(finished);
   },
   _recomputeValue: function() {
     var value;
+    this._animationFrame = null;
     if (this._hasEnded) {
       return;
     }
     value = this.__computeValue();
     assertType(value, Number);
     this._onUpdate(value);
-    this.__didComputeValue(value);
+    this.__didUpdate(value);
     if (this._hasEnded) {
       return;
     }
@@ -112,20 +118,16 @@ type.defineMethods({
   },
   _captureFrame: function() {
     var frame;
-    if (!this._frames) {
-      return;
-    }
     frame = this.__captureFrame();
-    if (frame) {
-      return this._frames.push(frame);
-    }
+    assertType(frame, Object);
+    return this._frames.push(frame);
   },
-  __onStart: function() {
+  __didStart: function() {
     return this._requestAnimationFrame();
   },
-  __onEnd: emptyFunction,
-  __captureFrame: emptyFunction,
-  __didComputeValue: emptyFunction
+  __didEnd: emptyFunction,
+  __didUpdate: emptyFunction,
+  __captureFrame: emptyFunction
 });
 
 type.mustOverride(["__computeValue"]);
