@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "requestAnimationFrame.js",
+  "sourceRoot": "../../../src/inject",
+  "sources": [
+    "requestAnimationFrame.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA,IAAA;;AAAA,UAAA,GAAa,OAAA,CAAQ,YAAR;;AAEb,MAAM,CAAC,OAAP,GAAiB,UAAA,CAAW,SAAC,IAAD;SAC1B,MAAM,CAAC,qBAAP,CAA6B,IAA7B;AAD0B,CAAX"
+}
