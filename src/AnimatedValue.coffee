@@ -1,6 +1,6 @@
 
 assertType = require "assertType"
-getArgProp = require "getArgProp"
+fromArgs = require "fromArgs"
 Immutable = require "immutable"
 Event = require "Event"
 Type = require "Type"
@@ -18,7 +18,7 @@ type.defineValues
 
   didSet: -> Event()
 
-  _value: getArgProp 0
+  _value: fromArgs 0
 
   _animation: null
 

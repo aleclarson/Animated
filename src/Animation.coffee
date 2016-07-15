@@ -4,7 +4,7 @@ require "isDev"
 emptyFunction = require "emptyFunction"
 assertTypes = require "assertTypes"
 assertType = require "assertType"
-getArgProp = require "getArgProp"
+fromArgs = require "fromArgs"
 Type = require "Type"
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get()
@@ -39,7 +39,7 @@ type.defineValues
 
   _hasEnded: no
 
-  _isInteraction: getArgProp "isInteraction"
+  _isInteraction: fromArgs "isInteraction"
 
   _animationFrame: null
 

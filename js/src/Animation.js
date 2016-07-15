@@ -1,4 +1,4 @@
-var Animation, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, getArgProp, requestAnimationFrame, type;
+var Animation, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, fromArgs, requestAnimationFrame, type;
 
 require("isDev");
 
@@ -8,7 +8,7 @@ assertTypes = require("assertTypes");
 
 assertType = require("assertType");
 
-getArgProp = require("getArgProp");
+fromArgs = require("fromArgs");
 
 Type = require("Type");
 
@@ -37,7 +37,7 @@ type.defineValues({
   startValue: null,
   _hasStarted: false,
   _hasEnded: false,
-  _isInteraction: getArgProp("isInteraction"),
+  _isInteraction: fromArgs("isInteraction"),
   _animationFrame: null,
   _previousAnimation: null,
   _onUpdate: null,
@@ -134,4 +134,4 @@ type.mustOverride(["__computeValue"]);
 
 module.exports = Animation = type.build();
 
-//# sourceMappingURL=../../map/src/Animation.map
+//# sourceMappingURL=map/Animation.map
