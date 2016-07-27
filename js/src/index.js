@@ -6,4 +6,4 @@ module.exports = {
   AnimatedMap: require("./AnimatedMap")
 };
 
-//# sourceMappingURL=../../map/src/index.map
+//# sourceMappingURL=map/index.map

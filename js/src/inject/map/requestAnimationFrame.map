@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "requestAnimationFrame.js",
-  "sourceRoot": "../../../src/inject",
+  "sourceRoot": "../../../../src/inject",
   "sources": [
     "requestAnimationFrame.coffee"
   ],

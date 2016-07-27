@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "InteractionManager.js",
-  "sourceRoot": "../../../src/inject",
+  "sourceRoot": "../../../../src/inject",
   "sources": [
     "InteractionManager.coffee"
   ],

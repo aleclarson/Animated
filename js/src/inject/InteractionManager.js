@@ -9,4 +9,4 @@ module.exports = Injectable({
   clearInteractionHandle: emptyFunction
 });
 
-//# sourceMappingURL=../../../map/src/inject/InteractionManager.map
+//# sourceMappingURL=map/InteractionManager.map

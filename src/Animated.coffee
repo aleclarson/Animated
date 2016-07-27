@@ -4,22 +4,22 @@ Type = require "Type"
 
 type = Type "Animated"
 
-type.mustOverride [
-  "__attach"
-  "__detach"
-  "__getValue"
-]
+type.defineHooks
 
-type.defineMethods
+  __attach: null
 
-  # Only gets the values that are animated.
-  __getAnimatedValue: ->
-    return @__getValue()
+  __detach: null
+
+  __getValue: null
 
   __addChild: emptyFunction
 
   __removeChild: emptyFunction
 
   __getChildren: emptyFunction.thatReturns []
+
+  # Only gets the values that are animated.
+  __getAnimatedValue: ->
+    return @__getValue()
 
 module.exports = type.build()

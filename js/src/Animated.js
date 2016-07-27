@@ -6,17 +6,18 @@ Type = require("Type");
 
 type = Type("Animated");
 
-type.mustOverride(["__attach", "__detach", "__getValue"]);
-
-type.defineMethods({
-  __getAnimatedValue: function() {
-    return this.__getValue();
-  },
+type.defineHooks({
+  __attach: null,
+  __detach: null,
+  __getValue: null,
   __addChild: emptyFunction,
   __removeChild: emptyFunction,
-  __getChildren: emptyFunction.thatReturns([])
+  __getChildren: emptyFunction.thatReturns([]),
+  __getAnimatedValue: function() {
+    return this.__getValue();
+  }
 });
 
 module.exports = type.build();
 
-//# sourceMappingURL=../../map/src/Animated.map
+//# sourceMappingURL=map/Animated.map
