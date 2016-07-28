@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "AnimatedValue.js",
-  "sourceRoot": "../../../src",
+  "sourceRoot": "../../src",
   "sources": [
     "AnimatedValue.coffee"
   ],
