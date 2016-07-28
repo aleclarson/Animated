@@ -1,6 +1,6 @@
-var Animated, Type, getArgProp, type;
+var Animated, Type, fromArgs, type;
 
-getArgProp = require("getArgProp");
+fromArgs = require("fromArgs");
 
 Type = require("Type");
 
@@ -16,8 +16,8 @@ type.argumentTypes = {
 };
 
 type.defineFrozenValues({
-  _values: getArgProp(0),
-  _onUpdate: getArgProp(1)
+  _values: fromArgs(0),
+  _onUpdate: fromArgs(1)
 });
 
 type.initInstance(function() {
@@ -84,4 +84,4 @@ type.overrideMethods({
 
 module.exports = type.build();
 
-//# sourceMappingURL=../../map/src/AnimatedMap.map
+//# sourceMappingURL=map/AnimatedMap.map

@@ -1,5 +1,5 @@
 
-getArgProp = require "getArgProp"
+fromArgs = require "fromArgs"
 Type = require "Type"
 
 Animated = require "./Animated"
@@ -14,9 +14,9 @@ type.argumentTypes =
 
 type.defineFrozenValues
 
-  _values: getArgProp 0
+  _values: fromArgs 0
 
-  _onUpdate: getArgProp 1
+  _onUpdate: fromArgs 1
 
 type.initInstance ->
 

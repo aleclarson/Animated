@@ -6,4 +6,4 @@ module.exports = Injectable(function(id) {
   return global.cancelAnimationFrame(id);
 });
 
-//# sourceMappingURL=../../../map/src/inject/cancelAnimationFrame.map
+//# sourceMappingURL=map/cancelAnimationFrame.map

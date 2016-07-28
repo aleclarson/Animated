@@ -4,7 +4,7 @@ require "isDev"
 emptyFunction = require "emptyFunction"
 assertTypes = require "assertTypes"
 assertType = require "assertType"
-getArgProp = require "getArgProp"
+fromArgs = require "fromArgs"
 Type = require "Type"
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get()
@@ -12,22 +12,9 @@ cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
 
 type = Type "Animation"
 
-type.optionTypes =
-  isInteraction: Boolean
-  captureFrames: Boolean
-
-type.optionDefaults =
-  isInteraction: yes
-  captureFrames: no
-
-type.bindMethods [
-  "_recomputeValue"
-]
-
-type.exposeGetters [
-  "hasStarted"
-  "hasEnded"
-]
+type.defineOptions
+  isInteraction: Boolean.withDefault yes
+  captureFrames: Boolean.withDefault no
 
 type.defineValues
 
@@ -39,7 +26,7 @@ type.defineValues
 
   _hasEnded: no
 
-  _isInteraction: getArgProp "isInteraction"
+  _isInteraction: fromArgs "isInteraction"
 
   _animationFrame: null
 
@@ -54,6 +41,24 @@ type.defineValues
 
   _captureFrame: (options) ->
     emptyFunction if not options.captureFrames
+
+type.defineGetters
+
+  hasStarted: -> @_hasStarted
+
+  hasEnded: -> @_hasEnded
+
+type.defineHooks
+
+  __computeValue: null
+
+  __didStart: -> @_requestAnimationFrame()
+
+  __didEnd: emptyFunction
+
+  __didUpdate: emptyFunction
+
+  __captureFrame: emptyFunction
 
 type.defineMethods
 
@@ -92,21 +97,6 @@ type.defineMethods
     @_cancelAnimationFrame()
     @__didEnd finished
 
-  _recomputeValue: ->
-
-    @_animationFrame = null
-    return if @_hasEnded
-
-    value = @__computeValue()
-    assertType value, Number
-
-    @_onUpdate value
-    @__didUpdate value
-
-    return if @_hasEnded
-    @_requestAnimationFrame()
-    @_captureFrame()
-
   _requestAnimationFrame: ->
     if not @_animationFrame
       @_animationFrame = requestAnimationFrame @_recomputeValue
@@ -123,16 +113,21 @@ type.defineMethods
     assertType frame, Object
     @_frames.push frame
 
-  __didStart: -> @_requestAnimationFrame()
+type.defineBoundMethods
 
-  __didEnd: emptyFunction
+  _recomputeValue: ->
 
-  __didUpdate: emptyFunction
+    @_animationFrame = null
+    return if @_hasEnded
 
-  __captureFrame: emptyFunction
+    value = @__computeValue()
+    assertType value, Number
 
-type.mustOverride [
-  "__computeValue"
-]
+    @_onUpdate value
+    @__didUpdate value
+
+    return if @_hasEnded
+    @_requestAnimationFrame()
+    @_captureFrame()
 
 module.exports = Animation = type.build()

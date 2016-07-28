@@ -1,8 +1,8 @@
-var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, getArgProp, type;
+var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, fromArgs, type;
 
 assertType = require("assertType");
 
-getArgProp = require("getArgProp");
+fromArgs = require("fromArgs");
 
 Immutable = require("immutable");
 
@@ -24,7 +24,7 @@ type.defineValues({
   didSet: function() {
     return Event();
   },
-  _value: getArgProp(0),
+  _value: fromArgs(0),
   _animation: null,
   _tracking: null
 });
@@ -135,4 +135,4 @@ type.overrideMethods({
 
 module.exports = type.build();
 
-//# sourceMappingURL=../../map/src/AnimatedValue.map
+//# sourceMappingURL=map/AnimatedValue.map

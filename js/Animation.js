@@ -1,4 +1,4 @@
-var Animation, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, getArgProp, requestAnimationFrame, type;
+var Animation, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, fromArgs, requestAnimationFrame, type;
 
 require("isDev");
 
@@ -8,7 +8,7 @@ assertTypes = require("assertTypes");
 
 assertType = require("assertType");
 
-getArgProp = require("getArgProp");
+fromArgs = require("fromArgs");
 
 Type = require("Type");
 
@@ -18,26 +18,17 @@ cancelAnimationFrame = require("./inject/cancelAnimationFrame").get();
 
 type = Type("Animation");
 
-type.optionTypes = {
-  isInteraction: Boolean,
-  captureFrames: Boolean
-};
-
-type.optionDefaults = {
-  isInteraction: true,
-  captureFrames: false
-};
-
-type.bindMethods(["_recomputeValue"]);
-
-type.exposeGetters(["hasStarted", "hasEnded"]);
+type.defineOptions({
+  isInteraction: Boolean.withDefault(true),
+  captureFrames: Boolean.withDefault(false)
+});
 
 type.defineValues({
   startTime: null,
   startValue: null,
   _hasStarted: false,
   _hasEnded: false,
-  _isInteraction: getArgProp("isInteraction"),
+  _isInteraction: fromArgs("isInteraction"),
   _animationFrame: null,
   _previousAnimation: null,
   _onUpdate: null,
@@ -52,6 +43,25 @@ type.defineValues({
       return emptyFunction;
     }
   }
+});
+
+type.defineGetters({
+  hasStarted: function() {
+    return this._hasStarted;
+  },
+  hasEnded: function() {
+    return this._hasEnded;
+  }
+});
+
+type.defineHooks({
+  __computeValue: null,
+  __didStart: function() {
+    return this._requestAnimationFrame();
+  },
+  __didEnd: emptyFunction,
+  __didUpdate: emptyFunction,
+  __captureFrame: emptyFunction
 });
 
 type.defineMethods({
@@ -89,22 +99,6 @@ type.defineMethods({
     this._cancelAnimationFrame();
     return this.__didEnd(finished);
   },
-  _recomputeValue: function() {
-    var value;
-    this._animationFrame = null;
-    if (this._hasEnded) {
-      return;
-    }
-    value = this.__computeValue();
-    assertType(value, Number);
-    this._onUpdate(value);
-    this.__didUpdate(value);
-    if (this._hasEnded) {
-      return;
-    }
-    this._requestAnimationFrame();
-    return this._captureFrame();
-  },
   _requestAnimationFrame: function() {
     if (!this._animationFrame) {
       this._animationFrame = requestAnimationFrame(this._recomputeValue);
@@ -121,17 +115,28 @@ type.defineMethods({
     frame = this.__captureFrame();
     assertType(frame, Object);
     return this._frames.push(frame);
-  },
-  __didStart: function() {
-    return this._requestAnimationFrame();
-  },
-  __didEnd: emptyFunction,
-  __didUpdate: emptyFunction,
-  __captureFrame: emptyFunction
+  }
 });
 
-type.mustOverride(["__computeValue"]);
+type.defineBoundMethods({
+  _recomputeValue: function() {
+    var value;
+    this._animationFrame = null;
+    if (this._hasEnded) {
+      return;
+    }
+    value = this.__computeValue();
+    assertType(value, Number);
+    this._onUpdate(value);
+    this.__didUpdate(value);
+    if (this._hasEnded) {
+      return;
+    }
+    this._requestAnimationFrame();
+    return this._captureFrame();
+  }
+});
 
 module.exports = Animation = type.build();
 
-//# sourceMappingURL=../../map/src/Animation.map
+//# sourceMappingURL=map/Animation.map
