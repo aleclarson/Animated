@@ -22,9 +22,7 @@ type.defineValues
 
   startValue: null
 
-  _hasStarted: no
-
-  _hasEnded: no
+  _state: 0
 
   _isInteraction: fromArgs "isInteraction"
 
@@ -44,9 +42,11 @@ type.defineValues
 
 type.defineGetters
 
-  hasStarted: -> @_hasStarted
+  isPending: -> @_state is 0
 
-  hasEnded: -> @_hasEnded
+  isActive: -> @_state is 1
+
+  isDone: -> @_state is 2
 
 type.defineHooks
 
@@ -64,8 +64,8 @@ type.defineMethods
 
   start: (config) ->
 
-    return if @_hasStarted
-    @_hasStarted = yes
+    return if not @isPending
+    @_state += 1
 
     assertTypes config,
       startValue: Number
@@ -92,8 +92,8 @@ type.defineMethods
     @_stop yes
 
   _stop: (finished) ->
-    return if @_hasEnded
-    @_hasEnded = yes
+    return if @isDone
+    @_state += 1
     @_cancelAnimationFrame()
     @__didEnd finished
 
@@ -118,7 +118,7 @@ type.defineBoundMethods
   _recomputeValue: ->
 
     @_animationFrame = null
-    return if @_hasEnded
+    return if @isDone
 
     value = @__computeValue()
     assertType value, Number
@@ -126,7 +126,7 @@ type.defineBoundMethods
     @_onUpdate value
     @__didUpdate value
 
-    return if @_hasEnded
+    return if @isDone
     @_requestAnimationFrame()
     @_captureFrame()
 
