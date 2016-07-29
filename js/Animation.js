@@ -26,8 +26,7 @@ type.defineOptions({
 type.defineValues({
   startTime: null,
   startValue: null,
-  _hasStarted: false,
-  _hasEnded: false,
+  _state: 0,
   _isInteraction: fromArgs("isInteraction"),
   _animationFrame: null,
   _previousAnimation: null,
@@ -46,11 +45,14 @@ type.defineValues({
 });
 
 type.defineGetters({
-  hasStarted: function() {
-    return this._hasStarted;
+  isPending: function() {
+    return this._state === 0;
   },
-  hasEnded: function() {
-    return this._hasEnded;
+  isActive: function() {
+    return this._state === 1;
+  },
+  isDone: function() {
+    return this._state === 2;
   }
 });
 
@@ -66,10 +68,10 @@ type.defineHooks({
 
 type.defineMethods({
   start: function(config) {
-    if (this._hasStarted) {
+    if (!this.isPending) {
       return;
     }
-    this._hasStarted = true;
+    this._state += 1;
     assertTypes(config, {
       startValue: Number,
       onUpdate: Function,
@@ -92,10 +94,10 @@ type.defineMethods({
     return this._stop(true);
   },
   _stop: function(finished) {
-    if (this._hasEnded) {
+    if (this.isDone) {
       return;
     }
-    this._hasEnded = true;
+    this._state += 1;
     this._cancelAnimationFrame();
     return this.__didEnd(finished);
   },
@@ -122,14 +124,14 @@ type.defineBoundMethods({
   _recomputeValue: function() {
     var value;
     this._animationFrame = null;
-    if (this._hasEnded) {
+    if (this.isDone) {
       return;
     }
     value = this.__computeValue();
     assertType(value, Number);
     this._onUpdate(value);
     this.__didUpdate(value);
-    if (this._hasEnded) {
+    if (this.isDone) {
       return;
     }
     this._requestAnimationFrame();
