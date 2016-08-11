@@ -1,5 +1,4 @@
 
-fromArgs = require "fromArgs"
 Type = require "Type"
 
 Animated = require "./Animated"
@@ -12,11 +11,11 @@ type.argumentTypes =
   values: Object
   onUpdate: Function
 
-type.defineFrozenValues
+type.defineFrozenValues (values, onUpdate) ->
 
-  _values: fromArgs 0
+  _values: values
 
-  _onUpdate: fromArgs 1
+  _onUpdate: onUpdate
 
 type.initInstance ->
 

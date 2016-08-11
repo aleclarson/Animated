@@ -1,6 +1,5 @@
 
 assertType = require "assertType"
-fromArgs = require "fromArgs"
 Immutable = require "immutable"
 Event = require "Event"
 Type = require "Type"
@@ -14,11 +13,11 @@ type = Type "AnimatedValue"
 
 type.inherits AnimatedWithChildren
 
-type.defineValues
+type.defineValues (value) ->
 
-  didSet: -> Event()
+  didSet: Event()
 
-  _value: fromArgs 0
+  _value: value
 
   _animation: null
 

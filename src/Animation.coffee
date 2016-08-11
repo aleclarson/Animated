@@ -4,8 +4,9 @@ require "isDev"
 emptyFunction = require "emptyFunction"
 assertTypes = require "assertTypes"
 assertType = require "assertType"
-fromArgs = require "fromArgs"
+isType = require "isType"
 Type = require "Type"
+Nan = require "Nan"
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get()
 cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
@@ -16,7 +17,7 @@ type.defineOptions
   isInteraction: Boolean.withDefault yes
   captureFrames: Boolean.withDefault no
 
-type.defineValues
+type.defineValues (options) ->
 
   startTime: null
 
@@ -24,7 +25,7 @@ type.defineValues
 
   _state: 0
 
-  _isInteraction: fromArgs "isInteraction"
+  _isInteraction: options.isInteraction
 
   _animationFrame: null
 
@@ -34,11 +35,9 @@ type.defineValues
 
   _onEnd: null
 
-  _frames: (options) ->
-    [] if options.captureFrames
+  _frames: [] if options.captureFrames
 
-  _captureFrame: (options) ->
-    emptyFunction if not options.captureFrames
+  _captureFrame: emptyFunction if not options.captureFrames
 
 type.defineGetters
 
@@ -96,6 +95,7 @@ type.defineMethods
     @_state += 1
     @_cancelAnimationFrame()
     @__didEnd finished
+    @_onEnd finished
 
   _requestAnimationFrame: ->
     if not @_animationFrame
@@ -121,7 +121,12 @@ type.defineBoundMethods
     return if @isDone
 
     value = @__computeValue()
-    assertType value, Number
+
+    if Nan.test value
+      throw TypeError "Unexpected NaN value!"
+
+    if not isType value, Number
+      throw TypeError "'__computeValue' must return a Number!"
 
     @_onUpdate value
     @__didUpdate value
@@ -129,5 +134,6 @@ type.defineBoundMethods
     return if @isDone
     @_requestAnimationFrame()
     @_captureFrame()
+    return
 
 module.exports = Animation = type.build()

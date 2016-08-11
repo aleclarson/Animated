@@ -1,8 +1,6 @@
-var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, fromArgs, type;
+var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, type;
 
 assertType = require("assertType");
-
-fromArgs = require("fromArgs");
 
 Immutable = require("immutable");
 
@@ -20,13 +18,13 @@ type = Type("AnimatedValue");
 
 type.inherits(AnimatedWithChildren);
 
-type.defineValues({
-  didSet: function() {
-    return Event();
-  },
-  _value: fromArgs(0),
-  _animation: null,
-  _tracking: null
+type.defineValues(function(value) {
+  return {
+    didSet: Event(),
+    _value: value,
+    _animation: null,
+    _tracking: null
+  };
 });
 
 type.defineMethods({

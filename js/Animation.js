@@ -1,4 +1,4 @@
-var Animation, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, fromArgs, requestAnimationFrame, type;
+var Animation, Nan, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, isType, requestAnimationFrame, type;
 
 require("isDev");
 
@@ -8,9 +8,11 @@ assertTypes = require("assertTypes");
 
 assertType = require("assertType");
 
-fromArgs = require("fromArgs");
+isType = require("isType");
 
 Type = require("Type");
+
+Nan = require("Nan");
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get();
 
@@ -23,25 +25,19 @@ type.defineOptions({
   captureFrames: Boolean.withDefault(false)
 });
 
-type.defineValues({
-  startTime: null,
-  startValue: null,
-  _state: 0,
-  _isInteraction: fromArgs("isInteraction"),
-  _animationFrame: null,
-  _previousAnimation: null,
-  _onUpdate: null,
-  _onEnd: null,
-  _frames: function(options) {
-    if (options.captureFrames) {
-      return [];
-    }
-  },
-  _captureFrame: function(options) {
-    if (!options.captureFrames) {
-      return emptyFunction;
-    }
-  }
+type.defineValues(function(options) {
+  return {
+    startTime: null,
+    startValue: null,
+    _state: 0,
+    _isInteraction: options.isInteraction,
+    _animationFrame: null,
+    _previousAnimation: null,
+    _onUpdate: null,
+    _onEnd: null,
+    _frames: options.captureFrames ? [] : void 0,
+    _captureFrame: !options.captureFrames ? emptyFunction : void 0
+  };
 });
 
 type.defineGetters({
@@ -99,7 +95,8 @@ type.defineMethods({
     }
     this._state += 1;
     this._cancelAnimationFrame();
-    return this.__didEnd(finished);
+    this.__didEnd(finished);
+    return this._onEnd(finished);
   },
   _requestAnimationFrame: function() {
     if (!this._animationFrame) {
@@ -128,14 +125,19 @@ type.defineBoundMethods({
       return;
     }
     value = this.__computeValue();
-    assertType(value, Number);
+    if (Nan.test(value)) {
+      throw TypeError("Unexpected NaN value!");
+    }
+    if (!isType(value, Number)) {
+      throw TypeError("'__computeValue' must return a Number!");
+    }
     this._onUpdate(value);
     this.__didUpdate(value);
     if (this.isDone) {
       return;
     }
     this._requestAnimationFrame();
-    return this._captureFrame();
+    this._captureFrame();
   }
 });
 

@@ -1,6 +1,4 @@
-var Animated, Type, fromArgs, type;
-
-fromArgs = require("fromArgs");
+var Animated, Type, type;
 
 Type = require("Type");
 
@@ -15,9 +13,11 @@ type.argumentTypes = {
   onUpdate: Function
 };
 
-type.defineFrozenValues({
-  _values: fromArgs(0),
-  _onUpdate: fromArgs(1)
+type.defineFrozenValues(function(values, onUpdate) {
+  return {
+    _values: values,
+    _onUpdate: onUpdate
+  };
 });
 
 type.initInstance(function() {
