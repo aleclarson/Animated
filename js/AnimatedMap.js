@@ -8,10 +8,10 @@ type = Type("AnimatedMap");
 
 type.inherits(Animated);
 
-type.argumentTypes = {
-  values: Object,
-  onUpdate: Function
-};
+type.defineArgs({
+  values: Object.isRequired,
+  onUpdate: Function.isRequired
+});
 
 type.defineFrozenValues(function(values, onUpdate) {
   return {
