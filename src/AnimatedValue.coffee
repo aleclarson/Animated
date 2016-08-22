@@ -1,6 +1,5 @@
 
 assertType = require "assertType"
-Immutable = require "immutable"
 Event = require "Event"
 Type = require "Type"
 
@@ -72,7 +71,7 @@ type.defineMethods
 
   _updateValue: (value) ->
     @_value = value
-    @_flush()
+    @_flushNodes()
     @didSet.emit @__getValue()
 
   _createInteraction: (animation) ->
@@ -85,24 +84,22 @@ type.defineMethods
 
   # Updates every 'Animated' instance
   # that has an 'update' function.
-  _flush: ->
-
-    leaves = Immutable.Set().withMutations (leaves) =>
-      @_rake leaves, this
-
-    leaves.forEach (node) ->
-      node.update()
+  _flushNodes: ->
+    nodes = new Set()
+    @_gatherNodes this, nodes
+    node.update() for node in nodes
+    return
 
   # Gathers every 'Animated' instance
   # that has an 'update' function.
-  _rake: (leaves, node) ->
+  _gatherNodes: (node, cache) ->
 
     if node.update
-      leaves.add node
+      cache.add node
       return
 
     for node in node.__getChildren()
-      @_rake leaves, node
+      @_gatherNodes node, cache
     return
 
 type.overrideMethods

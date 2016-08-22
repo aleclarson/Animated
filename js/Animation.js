@@ -1,6 +1,6 @@
-var Animation, Nan, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, isType, requestAnimationFrame, type;
+var Animation, Number, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, isType, requestAnimationFrame, type;
 
-require("isDev");
+Number = require("Nan").Number;
 
 emptyFunction = require("emptyFunction");
 
@@ -11,8 +11,6 @@ assertType = require("assertType");
 isType = require("isType");
 
 Type = require("Type");
-
-Nan = require("Nan");
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get();
 
@@ -113,7 +111,10 @@ type.defineMethods({
     var frame;
     frame = this.__captureFrame();
     assertType(frame, Object);
-    return this._frames.push(frame);
+    this._frames.push(frame);
+  },
+  _assertNumber: function(value) {
+    return assertType(value, Number);
   }
 });
 
@@ -125,12 +126,6 @@ type.defineBoundMethods({
       return;
     }
     value = this.__computeValue();
-    if (Nan.test(value)) {
-      throw TypeError("Unexpected NaN value!");
-    }
-    if (!isType(value, Number)) {
-      throw TypeError("'__computeValue' must return a Number!");
-    }
     this._onUpdate(value);
     this.__didUpdate(value);
     if (this.isDone) {

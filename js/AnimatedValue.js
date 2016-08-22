@@ -1,8 +1,6 @@
-var AnimatedWithChildren, Animation, Event, Immutable, InteractionManager, Type, assertType, type;
+var AnimatedWithChildren, Animation, Event, InteractionManager, Type, assertType, type;
 
 assertType = require("assertType");
-
-Immutable = require("immutable");
 
 Event = require("Event");
 
@@ -82,7 +80,7 @@ type.defineMethods({
   },
   _updateValue: function(value) {
     this._value = value;
-    this._flush();
+    this._flushNodes();
     return this.didSet.emit(this.__getValue());
   },
   _createInteraction: function(animation) {
@@ -97,27 +95,25 @@ type.defineMethods({
     }
     return InteractionManager.clearInteractionHandle(handle);
   },
-  _flush: function() {
-    var leaves;
-    leaves = Immutable.Set().withMutations((function(_this) {
-      return function(leaves) {
-        return _this._rake(leaves, _this);
-      };
-    })(this));
-    return leaves.forEach(function(node) {
-      return node.update();
-    });
+  _flushNodes: function() {
+    var i, len, node, nodes;
+    nodes = new Set();
+    this._gatherNodes(this, nodes);
+    for (i = 0, len = nodes.length; i < len; i++) {
+      node = nodes[i];
+      node.update();
+    }
   },
-  _rake: function(leaves, node) {
+  _gatherNodes: function(node, cache) {
     var i, len, ref;
     if (node.update) {
-      leaves.add(node);
+      cache.add(node);
       return;
     }
     ref = node.__getChildren();
     for (i = 0, len = ref.length; i < len; i++) {
       node = ref[i];
-      this._rake(leaves, node);
+      this._gatherNodes(node, cache);
     }
   }
 });

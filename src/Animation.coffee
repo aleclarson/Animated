@@ -1,12 +1,11 @@
 
-require "isDev"
+{Number} = require "Nan"
 
 emptyFunction = require "emptyFunction"
 assertTypes = require "assertTypes"
 assertType = require "assertType"
 isType = require "isType"
 Type = require "Type"
-Nan = require "Nan"
 
 requestAnimationFrame = require("./inject/requestAnimationFrame").get()
 cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
@@ -112,6 +111,10 @@ type.defineMethods
     frame = @__captureFrame()
     assertType frame, Object
     @_frames.push frame
+    return
+
+  _assertNumber: (value) ->
+    assertType value, Number
 
 type.defineBoundMethods
 
@@ -121,12 +124,6 @@ type.defineBoundMethods
     return if @isDone
 
     value = @__computeValue()
-
-    if Nan.test value
-      throw TypeError "Unexpected NaN value!"
-
-    if not isType value, Number
-      throw TypeError "'__computeValue' must return a Number!"
 
     @_onUpdate value
     @__didUpdate value
