@@ -13,6 +13,7 @@ cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
 type = Type "Animation"
 
 type.defineOptions
+  startValue: Number
   isInteraction: Boolean.withDefault yes
   captureFrames: Boolean.withDefault no
 
@@ -20,7 +21,7 @@ type.defineValues (options) ->
 
   startTime: null
 
-  startValue: null
+  startValue: options.startValue ? null
 
   _state: 0
 
@@ -50,7 +51,10 @@ type.defineHooks
 
   __computeValue: null
 
-  __didStart: -> @_requestAnimationFrame()
+  __didStart: (config) ->
+    @startTime = Date.now()
+    @startValue = config.startValue
+    @_requestAnimationFrame()
 
   __didEnd: emptyFunction
 
@@ -65,22 +69,17 @@ type.defineMethods
     return if not @isPending
     @_state += 1
 
-    assertTypes config,
-      startValue: Number
-      onUpdate: Function
-      onEnd: Function
-
-    @startTime = Date.now()
-    @startValue = config.startValue
-
-    @_onUpdate = config.onUpdate
-    @_onEnd = config.onEnd
-
     if config.previousAnimation instanceof Animation
       @_previousAnimation = config.previousAnimation
 
-    @__didStart()
-    @_captureFrame()
+    # Prefer 'startValue' specified in constructor.
+    if @startValue isnt null
+      config.startValue = @startValue
+
+    @_onUpdate = config.onUpdate or emptyFunction
+    @_onEnd = config.onEnd or emptyFunction
+
+    @__didStart config
     return
 
   stop: ->
@@ -124,13 +123,11 @@ type.defineBoundMethods
     return if @isDone
 
     value = @__computeValue()
-
     @_onUpdate value
     @__didUpdate value
-
-    return if @isDone
-    @_requestAnimationFrame()
     @_captureFrame()
+
+    @isDone or @_requestAnimationFrame()
     return
 
 module.exports = Animation = type.build()

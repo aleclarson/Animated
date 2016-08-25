@@ -19,14 +19,16 @@ cancelAnimationFrame = require("./inject/cancelAnimationFrame").get();
 type = Type("Animation");
 
 type.defineOptions({
+  startValue: Number,
   isInteraction: Boolean.withDefault(true),
   captureFrames: Boolean.withDefault(false)
 });
 
 type.defineValues(function(options) {
+  var ref;
   return {
     startTime: null,
-    startValue: null,
+    startValue: (ref = options.startValue) != null ? ref : null,
     _state: 0,
     _isInteraction: options.isInteraction,
     _animationFrame: null,
@@ -52,7 +54,9 @@ type.defineGetters({
 
 type.defineHooks({
   __computeValue: null,
-  __didStart: function() {
+  __didStart: function(config) {
+    this.startTime = Date.now();
+    this.startValue = config.startValue;
     return this._requestAnimationFrame();
   },
   __didEnd: emptyFunction,
@@ -66,20 +70,15 @@ type.defineMethods({
       return;
     }
     this._state += 1;
-    assertTypes(config, {
-      startValue: Number,
-      onUpdate: Function,
-      onEnd: Function
-    });
-    this.startTime = Date.now();
-    this.startValue = config.startValue;
-    this._onUpdate = config.onUpdate;
-    this._onEnd = config.onEnd;
     if (config.previousAnimation instanceof Animation) {
       this._previousAnimation = config.previousAnimation;
     }
-    this.__didStart();
-    this._captureFrame();
+    if (this.startValue !== null) {
+      config.startValue = this.startValue;
+    }
+    this._onUpdate = config.onUpdate || emptyFunction;
+    this._onEnd = config.onEnd || emptyFunction;
+    this.__didStart(config);
   },
   stop: function() {
     return this._stop(false);
@@ -128,11 +127,8 @@ type.defineBoundMethods({
     value = this.__computeValue();
     this._onUpdate(value);
     this.__didUpdate(value);
-    if (this.isDone) {
-      return;
-    }
-    this._requestAnimationFrame();
     this._captureFrame();
+    this.isDone || this._requestAnimationFrame();
   }
 });
 
