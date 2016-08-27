@@ -79,6 +79,7 @@ type.defineMethods({
     this._onUpdate = config.onUpdate || emptyFunction;
     this._onEnd = config.onEnd || emptyFunction;
     this.__didStart(config);
+    return this;
   },
   stop: function() {
     return this._stop(false);

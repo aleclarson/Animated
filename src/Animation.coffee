@@ -80,7 +80,7 @@ type.defineMethods
     @_onEnd = config.onEnd or emptyFunction
 
     @__didStart config
-    return
+    return this
 
   stop: ->
     @_stop no
