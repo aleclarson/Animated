@@ -12,6 +12,8 @@ cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
 
 type = Type "Animation"
 
+type.trace()
+
 type.defineOptions
   startValue: Number
   isInteraction: Boolean.withDefault yes
