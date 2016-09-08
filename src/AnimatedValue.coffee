@@ -6,7 +6,7 @@ Type = require "Type"
 AnimatedWithChildren = require "./AnimatedWithChildren"
 Animation = require "./Animation"
 
-InteractionManager = require("./inject/InteractionManager").get()
+injected = require "./injectable"
 
 type = Type "AnimatedValue"
 
@@ -76,11 +76,11 @@ type.defineMethods
 
   _createInteraction: (animation) ->
     return null unless animation.__isInteraction
-    InteractionManager.createInteractionHandle()
+    injected.get("InteractionManager").createInteractionHandle()
 
   _clearInteraction: (handle) ->
     return unless handle
-    InteractionManager.clearInteractionHandle handle
+    injected.get("InteractionManager").clearInteractionHandle handle
 
   # Updates every 'Animated' instance
   # that has an 'update' function.

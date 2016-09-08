@@ -1,4 +1,4 @@
-var AnimatedWithChildren, Animation, Event, InteractionManager, Type, assertType, type;
+var AnimatedWithChildren, Animation, Event, Type, assertType, injected, type;
 
 assertType = require("assertType");
 
@@ -10,7 +10,7 @@ AnimatedWithChildren = require("./AnimatedWithChildren");
 
 Animation = require("./Animation");
 
-InteractionManager = require("./inject/InteractionManager").get();
+injected = require("./injectable");
 
 type = Type("AnimatedValue");
 
@@ -87,13 +87,13 @@ type.defineMethods({
     if (!animation.__isInteraction) {
       return null;
     }
-    return InteractionManager.createInteractionHandle();
+    return injected.get("InteractionManager").createInteractionHandle();
   },
   _clearInteraction: function(handle) {
     if (!handle) {
       return;
     }
-    return InteractionManager.clearInteractionHandle(handle);
+    return injected.get("InteractionManager").clearInteractionHandle(handle);
   },
   _flushNodes: function() {
     var i, len, node, nodes;

@@ -1,4 +1,4 @@
-var Animation, Number, Type, assertType, assertTypes, cancelAnimationFrame, emptyFunction, isType, requestAnimationFrame, type;
+var Animation, Number, Type, assertType, assertTypes, emptyFunction, injected, isType, type;
 
 Number = require("Nan").Number;
 
@@ -12,9 +12,7 @@ isType = require("isType");
 
 Type = require("Type");
 
-requestAnimationFrame = require("./inject/requestAnimationFrame").get();
-
-cancelAnimationFrame = require("./inject/cancelAnimationFrame").get();
+injected = require("./injectable");
 
 type = Type("Animation");
 
@@ -100,12 +98,12 @@ type.defineMethods({
   },
   _requestAnimationFrame: function() {
     if (!this._animationFrame) {
-      this._animationFrame = requestAnimationFrame(this._recomputeValue);
+      this._animationFrame = injected.get("requestAnimationFrame")(this._recomputeValue);
     }
   },
   _cancelAnimationFrame: function() {
     if (this._animationFrame) {
-      cancelAnimationFrame(this._animationFrame);
+      injected.get("cancelAnimationFrame")(this._animationFrame);
       this._animationFrame = null;
     }
   },

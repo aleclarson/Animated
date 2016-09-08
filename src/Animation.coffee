@@ -7,8 +7,7 @@ assertType = require "assertType"
 isType = require "isType"
 Type = require "Type"
 
-requestAnimationFrame = require("./inject/requestAnimationFrame").get()
-cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
+injected = require "./injectable"
 
 type = Type "Animation"
 
@@ -99,12 +98,12 @@ type.defineMethods
 
   _requestAnimationFrame: ->
     if not @_animationFrame
-      @_animationFrame = requestAnimationFrame @_recomputeValue
+      @_animationFrame = injected.get("requestAnimationFrame") @_recomputeValue
     return
 
   _cancelAnimationFrame: ->
     if @_animationFrame
-      cancelAnimationFrame @_animationFrame
+      injected.get("cancelAnimationFrame") @_animationFrame
       @_animationFrame = null
     return
 
