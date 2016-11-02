@@ -70,7 +70,7 @@ type.defineMethods
 
   start: (config) ->
 
-    return if not @isPending
+    return this if not @isPending
     @_state += 1
 
     if config.previousAnimation instanceof Animation
