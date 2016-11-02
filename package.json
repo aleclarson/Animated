@@ -11,8 +11,9 @@
   },
   "dependencies": {
     "Event": "aleclarson/Event#2.0.1",
-    "Injectable": "aleclarson/Injectable#1.0.0",
+    "InjectableMap": "aleclarson/InjectableMap#1.0.0",
     "Nan": "aleclarson/Nan#1.1.0",
+    "Shape": "aleclarson/Shape#2.0.0",
     "Type": "aleclarson/Type#1.1.0",
     "assertType": "aleclarson/assertType#2.0.0",
     "assertTypes": "aleclarson/assertTypes#2.0.0",

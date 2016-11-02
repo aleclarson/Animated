@@ -99,14 +99,12 @@ type.defineMethods
     @__didEnd finished
     @_onEnd finished
 
-  _requestAnimationFrame: ->
-    if not @_animationFrame
-      @_animationFrame = injected.get("requestAnimationFrame") @_recomputeValue
-    return
+  _requestAnimationFrame: (callback) ->
+    @_animationFrame or @_animationFrame = injected.call "requestAnimationFrame", callback or @_recomputeValue
 
   _cancelAnimationFrame: ->
     if @_animationFrame
-      injected.get("cancelAnimationFrame") @_animationFrame
+      injected.call "cancelAnimationFrame", @_animationFrame
       @_animationFrame = null
     return
 
