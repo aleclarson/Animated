@@ -13,6 +13,9 @@ type = Type "Animation"
 
 type.trace()
 
+type.defineStatics
+  types: Object.create null
+
 type.defineOptions
   startValue: Number
   isInteraction: Boolean.withDefault yes
