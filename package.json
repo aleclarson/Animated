@@ -24,7 +24,8 @@
     "isType": "aleclarson/isType#1.0.0",
     "modx": "aleclarson/modx#1.0.0",
     "steal": "aleclarson/steal#1.2.0",
-    "sync": "aleclarson/sync#1.0.0"
+    "sync": "aleclarson/sync#1.0.0",
+    "tracker": "aleclarson/tracker#2.0.0"
   },
   "implicitDependencies": [
     "flattenStyle",

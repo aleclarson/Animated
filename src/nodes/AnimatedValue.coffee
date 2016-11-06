@@ -1,6 +1,7 @@
 
 assertType = require "assertType"
 Reaction = require "Reaction"
+Tracker = require "tracker"
 Event = require "Event"
 steal = require "steal"
 Type = require "Type"
@@ -19,6 +20,8 @@ type.defineValues (value) ->
 
   didSet: Event {async: no}
 
+  _dep: Tracker.Dependency()
+
   _value: value
 
   _animation: null
@@ -28,6 +31,7 @@ type.defineBoundMethods
   _updateValue: (value) ->
     @_value = value
     @_flushNodes()
+    @_dep.changed()
     @didSet.emit value
 
 type.definePrototype
@@ -47,6 +51,7 @@ type.defineGetters
 type.defineMethods
 
   get: ->
+    @_dep.depend() if Tracker.isActive
     return @_value
 
   set: (value) ->
