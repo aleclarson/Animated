@@ -16,8 +16,8 @@ type.createInstance ->
 type.overrideMethods
 
   # All values are refreshed when attaching new values.
-  __didSet: (newValues) ->
-    @didSet.emit @values
+  __didSet: ->
+    @didSet.emit @__getValue()
 
   __getValue: ->
 
