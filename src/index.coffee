@@ -3,7 +3,6 @@ LazyMap = require "LazyMap"
 
 module.exports = LazyMap
   Animation: -> require "./Animation"
-  AnimatedComponent: -> require "./AnimatedComponent"
   Animated: -> require "./nodes/Animated"
   AnimatedWithChildren: -> require "./nodes/AnimatedWithChildren"
   AnimatedValue: -> require "./nodes/AnimatedValue"
