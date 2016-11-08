@@ -1,10 +1,13 @@
 
 assertType = require "assertType"
 isType = require "isType"
+isDev = require "isDev"
 Type = require "Type"
 
+NativeAnimated = require "../NativeAnimated"
 AnimatedValue = require "./AnimatedValue"
 AnimatedMap = require "./AnimatedMap"
+Animated = require "./Animated"
 
 type = Type "AnimatedTransform"
 
@@ -13,24 +16,23 @@ type.inherits AnimatedMap
 type.createInstance ->
   return AnimatedMap {}
 
+type.definePrototype
+
+  __isAnimatedTransform: yes
+
 type.overrideMethods
 
-  # All values are refreshed when attaching new values.
-  __didSet: ->
-    @didSet.emit @__getValue()
-
   __getValue: ->
-
     transforms = []
 
     for key, value of @__values
       [index, key] = key.split "."
-      transform = transforms[index] ?= {}
+      transform = transforms[index] = {}
       transform[key] = value
 
     for key, animatedValue of @__animatedValues
       [index, key] = key.split "."
-      transform = transforms[index] ?= {}
+      transform = transforms[index] = {}
       transform[key] = animatedValue.__getValue()
 
     return transforms
@@ -42,21 +44,35 @@ type.overrideMethods
     return
 
   __attachValue: (transform, index) ->
-
-    return if not isType transform, Object
-
+    return unless isType transform, Object
     for key, value of transform
-
       key = index + "." + key
-
-      if value instanceof AnimatedValue
-        @__attachAnimatedValue value, key
+      if value instanceof Animated
+      then @__attachAnimatedValue value, key
       else @__values[key] = value
-
     return
 
-  # All values are refreshed when attaching new values.
   __detachOldValues: ->
     @detach()
+
+  __onParentUpdate: ->
+    @__updateChildren @__getValue()
+
+  __getNativeConfig: ->
+    transforms = []
+
+    type = "static"
+    for key, value of @__values
+      [index, property] = key.split "."
+      transforms[index] = {type, property, value}
+
+    type = "animated"
+    for key, animatedValue of @__animatedValues
+      [index, property] = key.split "."
+      nodeTag = animatedValue.__getNativeTag()
+      transforms[index] = {type, property, nodeTag}
+
+    isDev and NativeAnimated.validateTransform transforms
+    return {type: "transform", transforms}
 
 module.exports = type.build()

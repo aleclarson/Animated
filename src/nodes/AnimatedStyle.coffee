@@ -3,6 +3,7 @@ flattenStyle = require "flattenStyle"
 Type = require "Type"
 
 AnimatedTransform = require "./AnimatedTransform"
+NativeAnimated = require "../NativeAnimated"
 AnimatedMap = require "./AnimatedMap"
 
 type = Type "AnimatedStyle"
@@ -32,5 +33,14 @@ type.overrideMethods
 
     @__super arguments
     return
+
+  __getNativeConfig: ->
+
+    style = {}
+    for key, animatedValue of @__animatedValues
+      style[key] = animatedValue.__getNativeTag()
+
+    isDev and NativeAnimated.validateStyle style
+    return {type: "style", style}
 
 module.exports = type.build()

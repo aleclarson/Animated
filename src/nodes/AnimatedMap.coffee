@@ -5,10 +5,14 @@ isType = require "isType"
 Event = require "Event"
 Type = require "Type"
 
+AnimatedWithChildren = require "./AnimatedWithChildren"
+AnimatedStyle = require "./AnimatedStyle"
 AnimatedValue = require "./AnimatedValue"
 Animated = require "./Animated"
 
 type = Type "AnimatedMap"
+
+type.inherits AnimatedWithChildren
 
 type.defineFrozenValues
 
@@ -18,22 +22,35 @@ type.defineValues (values) ->
 
   __values: values
 
-  __animatedListeners: {}
-
   __animatedValues: {}
+
+type.definePrototype
+
+  __isAnimatedMap: yes
 
 type.defineMethods
 
   attach: (newValues) ->
     @__detachOldValues newValues
     @__attachNewValues newValues
-    return this
+    @__attach()
+    return
 
   detach: ->
-    @__detachAnimatedValues()
+
+    for key, animatedValue of @_animatedValues
+      animatedValue.__removeChild this
+
+    @__values = {}
     @__animatedValues = {}
-    @__animatedListeners = {}
+    @__detach()
     return
+
+type.overrideMethods
+
+  __updateChildren: (value) ->
+    @__super arguments
+    @didSet.emit value
 
 type.defineHooks
 
@@ -42,12 +59,16 @@ type.defineHooks
     values = cloneObject @__values
 
     for key, animatedValue of @__animatedValues
+
+      if animatedValue.__isAnimatedMap
+        continue if animatedValue.__isAnimatedTransform
+
+      else if animatedValue.__isNative
+        continue
+
       values[key] = animatedValue.__getValue()
 
     return values
-
-  __didSet: (newValues) ->
-    @didSet.emit newValues
 
   #
   # Attaching values
@@ -76,46 +97,24 @@ type.defineHooks
 
   __attachAnimatedValue: (animatedValue, key) ->
     if not @__animatedValues[key]
+      animatedValue.__addChild this, key
       @__values[key] = undefined # <= Preserve key order within this.__values
       @__animatedValues[key] = animatedValue
-      @__attachAnimatedListener animatedValue, key
-    return
-
-  __attachAnimatedListener: (animatedValue, key) ->
-
-    onChange = (newValue) =>
-      newValues = {}
-      newValues[key] = newValue
-      @__didSet newValues
-
-    listener = animatedValue.didSet onChange
-    @__animatedListeners[key] = listener.start()
     return
 
   #
   # Detaching values
   #
 
-  __detachAnimatedValues: ->
-    for key, animatedValue of @__animatedValues
-      @__detachAnimatedListener animatedValue, key
-    return
-
-  __detachAnimatedListener: (animatedValue, key) ->
-    @__animatedListeners[key].stop()
-    delete @__animatedListeners[key]
-    return
-
   __detachOldValues: (newValues) ->
     assertType newValues, Object
     animatedValues = @__animatedValues
     for key, animatedValue of animatedValues
       if animatedValue is newValues[key]
-        if animatedValue instanceof AnimatedMap
+        if animatedValue.__isAnimatedMap
           animatedValue.__detachOldValues newValues[key]
       else
-        @__detachAnimatedListener animatedValue, key
-        if animatedValue instanceof AnimatedMap
+        if animatedValue.__isAnimatedMap
           animatedValue.detach()
         delete animatedValues[key]
     return

@@ -3,10 +3,12 @@ assertType = require "assertType"
 Reaction = require "Reaction"
 Tracker = require "tracker"
 Event = require "Event"
+isDev = require "isDev"
 steal = require "steal"
 Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
+NativeAnimated = require "../NativeAnimated"
 AnimationPath = require "../AnimationPath"
 Animation = require "../Animation"
 
@@ -24,13 +26,15 @@ type.defineValues (value) ->
 
   _value: value
 
+type.defineReactiveValues
+
   _animation: null
 
 type.defineBoundMethods
 
-  _updateValue: (value) ->
+  _updateValue: (value, isNative) ->
     @_value = value
-    @_flushNodes()
+    isNative or @__updateChildren value
     @_dep.changed()
     @didSet.emit value
 
@@ -48,6 +52,21 @@ type.defineGetters
 
   isAnimating: -> @_animation isnt null
 
+type.overrideMethods
+
+  __detach: ->
+    @stopAnimation()
+    @__super arguments
+
+  __getValue: ->
+    return @_value
+
+  __updateChildren: ->
+    @__super [@__getValue()]
+
+  __getNativeConfig: ->
+    {type: "value", value: @_value}
+
 type.defineMethods
 
   get: ->
@@ -56,7 +75,8 @@ type.defineMethods
 
   set: (value) ->
     @stopAnimation()
-    @_updateValue value
+    @_updateValue value, @__isNative
+    @__isNative and NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
     return
 
   react: (get) ->
@@ -94,18 +114,11 @@ type.defineMethods
     animation = type config
     isDev and assertType animation, Animation.Kind
 
-    prevAnim.stop() if prevAnim = @_animation
-    handle = @_createInteraction animation
-    @_animation = animation.start
-      previousAnimation: prevAnim
-      startValue: @_value
-      onUpdate: @_updateValue
-      onEnd: (finished) =>
-        @_animation = null
-        @_clearInteraction handle
-        updater and updater.detach()
-        finished and onFinish()
-        onEnd finished
+    @_animation = animation.start this, (finished) =>
+      @_animation = null
+      updater and updater.detach()
+      finished and onFinish()
+      onEnd finished
 
   stopAnimation: ->
     if @_animation
@@ -121,51 +134,25 @@ type.defineMethods
       maxIndex = values.length - 1
       while newValue >= values[++index]
         break if index is maxIndex
-      startValue = values[index - 1]
-      if startValue is undefined
+      fromValue = values[index - 1]
+      if fromValue is undefined
         index += 1
         progress = 0
       else
-        progress = (newValue - startValue) / (values[index] - startValue)
+        progress = (newValue - fromValue) / (values[index] - fromValue)
         progress = clampValue progress, 0, 1
       path._update index - 1, progress
       return
     return path
 
-  _createInteraction: (animation) ->
-    return null unless animation.__isInteraction
-    injected.get("InteractionManager").createInteractionHandle()
-
-  _clearInteraction: (handle) ->
-    return unless handle
-    injected.get("InteractionManager").clearInteractionHandle handle
-
-  # Updates every 'Animated' instance
-  # that has an 'update' function.
-  _flushNodes: ->
-    nodes = new Set()
-    @_gatherNodes this, nodes
-    node.update() for node in nodes
+  _createNativeValueListener: ->
+    log.it @__name + "._createNativeValueListener()"
+    NativeAnimated.addUpdateListener this
     return
 
-  # Gathers every 'Animated' instance
-  # that has an 'update' function.
-  _gatherNodes: (node, cache) ->
-
-    if node.update
-      cache.add node
-      return
-
-    for node in node.__getChildren()
-      @_gatherNodes node, cache
+  _deleteNativeValueListener: ->
+    log.it @__name + "._deleteNativeValueListener()"
+    NativeAnimated.removeUpdateListener this
     return
-
-type.overrideMethods
-
-  __detach: ->
-    @stopAnimation()
-
-  __getValue: ->
-    return @_value
 
 module.exports = type.build()
