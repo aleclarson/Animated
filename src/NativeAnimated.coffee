@@ -15,7 +15,7 @@ if exports.isAvailable = NativeAnimatedModule?
   nativeEvents.addListener "onAnimatedValueUpdate", (data) ->
     return unless animatedValue = updatedValues[data.tag]
     return unless animation = animatedValue._animation
-    if animation.isActive and animation._nativeTag is data.animation
+    if animation._nativeTag is data.animation
       animatedValue._updateValue data.value, yes
 
   delete exports.startListeningToAnimatedNodeValue

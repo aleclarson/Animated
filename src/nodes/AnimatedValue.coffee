@@ -1,5 +1,6 @@
 
 assertType = require "assertType"
+clampValue = require "clampValue"
 Reaction = require "Reaction"
 Tracker = require "tracker"
 Event = require "Event"
@@ -33,6 +34,7 @@ type.defineReactiveValues
 type.defineBoundMethods
 
   _updateValue: (value, isNative) ->
+    return if value is @_value
     @_value = value
     isNative or @__updateChildren value
     @_dep.changed()
@@ -91,16 +93,6 @@ type.defineMethods
   animate: (config) ->
     assertType config, Object
 
-    if onUpdate = steal config, "onUpdate"
-      isDev and assertType onUpdate, Function
-      updater = @didSet(onUpdate).start()
-
-    onFinish = steal config, "onFinish", emptyFunction
-    isDev and assertType onFinish, Function
-
-    onEnd = steal config, "onEnd", emptyFunction
-    isDev and assertType onEnd, Function
-
     type = steal config, "type"
     isDev and assertType type, String.or Function.Kind
 
@@ -111,13 +103,26 @@ type.defineMethods
 
       type = Animation.types[type]
 
+    onUpdate = steal config, "onUpdate"
+    onFinish = steal config, "onFinish", emptyFunction
+    onEnd = steal config, "onEnd", emptyFunction
+
+    if isDev
+      assertType onUpdate, Function.Maybe
+      assertType onFinish, Function
+      assertType onEnd, Function
+
     animation = type config
     isDev and assertType animation, Animation.Kind
 
+    if onUpdate
+      isDev and assertType onUpdate, Function
+      updater = @didSet(onUpdate).start()
+
     @_animation = animation.start this, (finished) =>
       @_animation = null
-      updater and updater.detach()
-      finished and onFinish()
+      updater?.detach()
+      onFinish() if finished
       onEnd finished
 
   stopAnimation: ->
@@ -144,15 +149,5 @@ type.defineMethods
       path._update index - 1, progress
       return
     return path
-
-  _createNativeValueListener: ->
-    log.it @__name + "._createNativeValueListener()"
-    NativeAnimated.addUpdateListener this
-    return
-
-  _deleteNativeValueListener: ->
-    log.it @__name + "._deleteNativeValueListener()"
-    NativeAnimated.removeUpdateListener this
-    return
 
 module.exports = type.build()

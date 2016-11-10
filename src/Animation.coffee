@@ -120,10 +120,12 @@ type.defineMethods
       id = @_createInteraction()
 
     @_onEnd = (finished) =>
-      @_useNativeDriver and log.it @__name + ".onEnd()"
       @_onEnd = emptyFunction
       @_clearInteraction id
-      @_useNativeDriver and animated._deleteNativeValueListener()
+
+      if @_useNativeDriver
+        NativeAnimated.removeUpdateListener this
+
       @__onAnimationEnd finished
       onEnd finished
 
@@ -153,11 +155,16 @@ type.defineMethods
     @__onAnimationStart animated
 
   _startNativeAnimation: (animated) ->
-    @_nativeTag = tag = NativeAnimated.createAnimationTag()
+    @_nativeTag = NativeAnimated.createAnimationTag()
     animated.__markNative()
-    animated._createNativeValueListener()
-    log.it @__name + "._startNativeAnimation()"
-    NativeAnimated.startAnimatingNode tag, animated.__getNativeTag(), @__getNativeConfig(), @_onEnd
+    animatedTag = animated.__getNativeTag()
+    animationConfig = @__getNativeConfig()
+    NativeAnimated.addUpdateListener animated
+    NativeAnimated.startAnimatingNode @_nativeTag, animatedTag, animationConfig, (data) =>
+      return if @isDone
+      @_state += 1
+      @_onEnd data.finished
+      return
 
   _stopAnimation: (finished) ->
     return if @isDone
