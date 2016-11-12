@@ -86,30 +86,33 @@ type.defineMethods
 
   setAnimatedView: (animatedView) ->
 
-    if @_animatedView
-      throw Error "Must first disconnect the current view!"
+    if @__isNative and @_animatedView
+      @_disconnectAnimatedView()
 
     @_animatedView = animatedView
-    @__isNative and @_connectAnimatedView()
+
+    if @__isNative and animatedView
+      @_connectAnimatedView()
     return
 
   _connectAnimatedView: ->
-    NativeAnimated.connectAnimatedNodeToView @__getNativeTag(), @_getNativeViewTag()
+
+    unless @__isNative
+      throw Error "Must call '__markNative' before '_connectAnimatedView'!"
+
+    unless @_animatedView
+      throw Error "Must call 'setAnimatedView' before '_connectAnimatedView'!"
+
+    nodeTag = findNodeHandle @_animatedView
+    NativeAnimated.connectAnimatedNodeToView @__getNativeTag(), nodeTag
     return
 
   _disconnectAnimatedView: ->
-    NativeAnimated.disconnectAnimatedNodeFromView @__getNativeTag(), @_getNativeViewTag()
-    return
-
-  _getNativeViewTag: ->
 
     unless @__isNative
       throw Error "Must call '__markNative' before '_disconnectAnimatedView'!"
 
-    tag = findNodeHandle @_animatedView
-    unless tag?
-      throw Error "Must call 'setAnimatedView' before '_connectAnimatedView'!"
-
-    return tag
+    NativeAnimated.disconnectAnimatedNodeFromView @__getNativeTag()
+    return
 
 module.exports = type.build()

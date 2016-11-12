@@ -97,9 +97,9 @@ type.defineHooks
 
   __attachAnimatedValue: (animatedValue, key) ->
     if not @__animatedValues[key]
-      animatedValue.__addChild this, key
       @__values[key] = undefined # <= Preserve key order within this.__values
       @__animatedValues[key] = animatedValue
+      animatedValue.__addChild this, key
     return
 
   #
@@ -110,12 +110,15 @@ type.defineHooks
     assertType newValues, Object
     animatedValues = @__animatedValues
     for key, animatedValue of animatedValues
-      if animatedValue is newValues[key]
-        if animatedValue.__isAnimatedMap
-          animatedValue.__detachOldValues newValues[key]
-      else
-        if animatedValue.__isAnimatedMap
-          animatedValue.detach()
+      hasChanged = animatedValue isnt newValues[key]
+
+      if animatedValue.__isAnimatedMap
+        if hasChanged
+        then animatedValue.detach()
+        else animatedValue.__detachOldValues newValues[key]
+
+      if hasChanged
+        animatedValue.__removeChild this
         delete animatedValues[key]
     return
 

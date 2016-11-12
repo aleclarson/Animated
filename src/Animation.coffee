@@ -124,7 +124,7 @@ type.defineMethods
       @_clearInteraction id
 
       if @_useNativeDriver
-        NativeAnimated.removeUpdateListener this
+        NativeAnimated.removeUpdateListener animated
 
       @__onAnimationEnd finished
       onEnd finished

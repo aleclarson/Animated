@@ -36,7 +36,7 @@ type.defineBoundMethods
   _updateValue: (value, isNative) ->
     return if value is @_value
     @_value = value
-    isNative or @__updateChildren value
+    @__updateChildren value unless isNative
     @_dep.changed()
     @didSet.emit value
 
@@ -78,7 +78,8 @@ type.defineMethods
   set: (value) ->
     @stopAnimation()
     @_updateValue value, @__isNative
-    @__isNative and NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
+    if @__isNative
+      NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
     return
 
   react: (get) ->
@@ -92,6 +93,9 @@ type.defineMethods
 
   animate: (config) ->
     assertType config, Object
+
+    unless @_children.length
+      throw Error "Cannot 'animate' unless attached to a mounted view!"
 
     type = steal config, "type"
     isDev and assertType type, String.or Function.Kind
