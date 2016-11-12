@@ -120,6 +120,8 @@ type.defineMethods
       assertType onFinish, Function
       assertType onEnd, Function
 
+    config.useNativeDriver ?= @__isNative
+
     animation = type config
     isDev and assertType animation, Animation.Kind
 
