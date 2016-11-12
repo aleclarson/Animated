@@ -132,11 +132,8 @@ type.defineMethods
     @_startAnimation animated
     return this
 
-  stop: ->
-    @_stopAnimation no
-
-  finish: ->
-    @_stopAnimation yes
+  stop: (finished = no) ->
+    @_stopAnimation finished
 
   _requestAnimationFrame: (callback) ->
     @_animationFrame or @_animationFrame = injected.call "requestAnimationFrame", callback or @_recomputeValue
