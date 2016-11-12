@@ -19,6 +19,10 @@ type = Type "AnimatedValue"
 
 type.inherits AnimatedWithChildren
 
+type.initInstance (_, options) ->
+  if options and options.isNative
+    @__markNative()
+
 type.defineValues (value) ->
 
   didSet: Event {async: no}
