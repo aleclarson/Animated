@@ -98,8 +98,8 @@ type.defineMethods
   animate: (config) ->
     assertType config, Object
 
-    unless @_children.length
-      throw Error "Cannot 'animate' unless attached to a mounted view!"
+    unless @didSet.hasListeners or @_children.length
+      return log.warn "Must have listeners or animated children!"
 
     type = steal config, "type"
     isDev and assertType type, String.or Function.Kind
