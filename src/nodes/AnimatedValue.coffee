@@ -111,23 +111,22 @@ type.defineMethods
 
       type = Animation.types[type]
 
-    onUpdate = steal config, "onUpdate"
-    onFinish = steal config, "onFinish", emptyFunction
-    onEnd = steal config, "onEnd", emptyFunction
+    if onUpdate = steal config, "onUpdate"
+      isDev and assertType onUpdate, Function
+      updater = @didSet(onUpdate).start()
 
-    if isDev
-      assertType onUpdate, Function.Maybe
-      assertType onFinish, Function
-      assertType onEnd, Function
+    onFinish = steal config, "onFinish", emptyFunction
+    isDev and assertType onFinish, Function
+
+    onEnd = steal config, "onEnd", emptyFunction
+    isDev and assertType onEnd, Function
 
     config.useNativeDriver ?= @__isNative
+    unless config.useNativeDriver
+      config.onUpdate = @_updateValue
 
     animation = type config
     isDev and assertType animation, Animation.Kind
-
-    if onUpdate
-      isDev and assertType onUpdate, Function
-      updater = @didSet(onUpdate).start()
 
     @_animation = animation.start this, (finished) =>
       @_animation = null
