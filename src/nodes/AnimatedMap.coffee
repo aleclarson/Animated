@@ -1,5 +1,4 @@
 
-cloneObject = require "cloneObject"
 assertType = require "assertType"
 isType = require "isType"
 Event = require "Event"
@@ -54,21 +53,22 @@ type.overrideMethods
 
 type.defineHooks
 
-  __getValue: ->
 
-    values = cloneObject @__values
+  __getValue: do ->
 
-    for key, animatedValue of @__animatedValues
-
+    isNative = (animatedValue) ->
       if animatedValue.__isAnimatedMap
-        continue if animatedValue.__isAnimatedTransform
+      then animatedValue.__isAnimatedTransform
+      else animatedValue.__isNative
 
-      else if animatedValue.__isNative
-        continue
-
-      values[key] = animatedValue.__getValue()
-
-    return values
+    return ->
+      values = {}
+      for key, value of @__values
+        if animatedValue = @__animatedValues[key]
+          continue if isNative animatedValue
+          values[key] = animatedValue.__getValue()
+        else values[key] = value
+      return values
 
   #
   # Attaching values
