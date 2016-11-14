@@ -22,6 +22,8 @@ type.definePrototype
 
 type.overrideMethods
 
+  __getInitialValue: -> @__getValue()
+
   __getValue: ->
     transforms = []
 

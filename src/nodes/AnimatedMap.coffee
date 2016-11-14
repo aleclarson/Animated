@@ -53,6 +53,16 @@ type.overrideMethods
 
 type.defineHooks
 
+  __getInitialValue: ->
+    values = {}
+    for key, value of @__values
+      values[key] =
+        if animatedValue = @__animatedValues[key]
+          if animatedValue.__isAnimatedMap
+          then animatedValue.__getInitialValue()
+          else animatedValue._value
+        else value
+    return values
 
   __getValue: do ->
 
