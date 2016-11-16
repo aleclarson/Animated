@@ -106,10 +106,10 @@ type.defineHooks
     return
 
   __attachAnimatedValue: (animatedValue, key) ->
-    if not @__animatedValues[key]
-      @__values[key] = undefined # <= Preserve key order within this.__values
-      @__animatedValues[key] = animatedValue
-      animatedValue.__addChild this, key
+    return if @__animatedValues[key]
+    @__values[key] = undefined # <= Preserve key order within this.__values
+    @__animatedValues[key] = animatedValue
+    animatedValue.__addChild this, key
     return
 
   #
