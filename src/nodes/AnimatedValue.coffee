@@ -59,6 +59,8 @@ type.defineGetters
 
   isAnimating: -> @_animation isnt null
 
+  animation: -> @_animation
+
 type.overrideMethods
 
   __detach: ->
