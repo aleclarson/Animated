@@ -101,8 +101,9 @@ type.defineMethods
   animate: (config) ->
     assertType config, Object
 
-    unless @didSet.hasListeners or @_children.length
-      return log.warn "Must have listeners or animated children!"
+    if isDev and @__isNative
+      unless @didSet.hasListeners or @_children.length
+        return log.warn "Must have listeners or animated children!"
 
     type = steal config, "type"
     isDev and assertType type, String.or Function.Kind
