@@ -38,11 +38,12 @@ type.defineReactiveValues
 type.defineBoundMethods
 
   _updateValue: (value, isNative) ->
-    return if value is @_value
+    oldValue = @_value
+    return if value is oldValue
     @_value = value
     @__updateChildren value unless isNative
     @_dep.changed()
-    @didSet.emit value
+    @didSet.emit value, oldValue
 
 type.definePrototype
 
