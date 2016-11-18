@@ -1,12 +1,28 @@
 
-module.exports =
+LazyMap = require "LazyMap"
 
-  Animation: require "./Animation"
+module.exports = LazyMap
 
-  Animated: require "./Animated"
+  Animation: -> require "./Animation"
 
-  AnimatedWithChildren: require "./AnimatedWithChildren"
+  AnimatedValue: -> require "./nodes/AnimatedValue"
 
-  AnimatedValue: require "./AnimatedValue"
+  AnimatedProps: -> require "./nodes/AnimatedProps"
 
-  AnimatedMap: require "./AnimatedMap"
+  AnimatedStyle: -> require "./nodes/AnimatedStyle"
+
+  AnimatedTransform: -> require "./nodes/AnimatedTransform"
+
+  # AnimatedAddition: -> require "./nodes/AnimatedAddition"
+
+  # AnimatedExponent: -> require "./nodes/AnimatedExponent"
+
+  # AnimatedDiffClamp: -> require "./nodes/AnimatedDiffClamp"
+
+  # AnimatedInterpolation: -> require "./nodes/AnimatedInterpolation"
+
+  AnimatedWithChildren: -> require "./nodes/AnimatedWithChildren"
+
+  Animated: -> require "./nodes/Animated"
+
+  NativeAnimated: -> require "./NativeAnimated"

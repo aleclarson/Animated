@@ -1,44 +1,87 @@
 
-require "isDev"
+{Number} = require "Nan"
 
 emptyFunction = require "emptyFunction"
-assertTypes = require "assertTypes"
 assertType = require "assertType"
-fromArgs = require "fromArgs"
+LazyVar = require "LazyVar"
+Promise = require "Promise"
 Type = require "Type"
 
-requestAnimationFrame = require("./inject/requestAnimationFrame").get()
-cancelAnimationFrame = require("./inject/cancelAnimationFrame").get()
+NativeAnimated = require "./NativeAnimated"
+injected = require "./injectable"
+
+# Avoid circular dependency.
+AnimatedValue = LazyVar -> require "./nodes/AnimatedValue"
 
 type = Type "Animation"
 
-type.defineOptions
-  isInteraction: Boolean.withDefault yes
-  captureFrames: Boolean.withDefault no
+type.trace()
 
-type.defineValues
+type.defineStatics
+  types: Object.create null
+
+type.defineOptions
+  fromValue: Number
+  isInteraction: Boolean.withDefault yes
+  useNativeDriver: Boolean.withDefault no
+  captureFrames: Boolean.withDefault no
+  onUpdate: Function.withDefault emptyFunction
+
+type.initArgs do ->
+  hasWarned = no
+  return (args) ->
+    return unless args[0].useNativeDriver
+    return if NativeAnimated.isAvailable or hasWarned
+    args[0].useNativeDriver = no
+    log.warn "Failed to load NativeAnimatedModule! Falling back to JS-driven animations."
+    hasWarned = yes
+
+type.defineValues (options) ->
 
   startTime: null
 
-  startValue: null
+  fromValue: options.fromValue ? null
+
+  _deferred: Promise.defer()
 
   _state: 0
 
-  _isInteraction: fromArgs "isInteraction"
+  _isInteraction: options.isInteraction
+
+  _useNativeDriver: options.useNativeDriver
+
+  _nativeTag: null
 
   _animationFrame: null
 
   _previousAnimation: null
 
-  _onUpdate: null
+  _onUpdate: options.onUpdate
 
   _onEnd: null
 
-  _frames: (options) ->
-    [] if options.captureFrames
+  _frames: [] if options.captureFrames
 
-  _captureFrame: (options) ->
-    emptyFunction if not options.captureFrames
+  _captureFrame: emptyFunction unless options.captureFrames
+
+type.defineBoundMethods
+
+  _recomputeValue: ->
+
+    @_animationFrame = null
+    return if @isDone
+
+    value = @__computeValue()
+    @__onAnimationUpdate value
+    @_captureFrame()
+
+    @_onUpdate value
+    @isDone or @_requestAnimationFrame()
+    return
+
+#
+# Prototype
+#
 
 type.defineGetters
 
@@ -52,82 +95,105 @@ type.defineHooks
 
   __computeValue: null
 
-  __didStart: -> @_requestAnimationFrame()
+  __onAnimationStart: (animated) ->
+    if @_useNativeDriver
+    then @_startNativeAnimation animated
+    else @_requestAnimationFrame()
 
-  __didEnd: emptyFunction
+  __onAnimationUpdate: emptyFunction
 
-  __didUpdate: emptyFunction
+  __onAnimationEnd: emptyFunction
 
   __captureFrame: emptyFunction
 
+  __getNativeConfig: ->
+    throw Error "This animation type does not support native offloading!"
+
 type.defineMethods
 
-  start: (config) ->
+  start: (animated, onEnd) ->
+    assertType animated, AnimatedValue.get()
+    assertType onEnd, Function
 
-    return if not @isPending
+    return this unless @isPending
     @_state += 1
 
-    assertTypes config,
-      startValue: Number
-      onUpdate: Function
-      onEnd: Function
+    @_previousAnimation = animated._animation
+    @_previousAnimation?.stop()
 
-    @startTime = Date.now()
-    @startValue = config.startValue
+    if @_isInteraction
+      id = @_createInteraction()
 
-    @_onUpdate = config.onUpdate
-    @_onEnd = config.onEnd
+    @_onEnd = (finished) =>
+      @_onEnd = emptyFunction
+      @_clearInteraction id
 
-    if config.previousAnimation instanceof Animation
-      @_previousAnimation = config.previousAnimation
+      if @_useNativeDriver
+        NativeAnimated.removeUpdateListener animated
 
-    @__didStart()
-    @_captureFrame()
-    return
+      @__onAnimationEnd finished
+      onEnd finished
+      @_deferred.resolve finished
 
-  stop: ->
-    @_stop no
+    @_startAnimation animated
+    return this
 
-  finish: ->
-    @_stop yes
+  stop: (finished = no) ->
+    @_stopAnimation finished
 
-  _stop: (finished) ->
-    return if @isDone
-    @_state += 1
-    @_cancelAnimationFrame()
-    @__didEnd finished
+  then: (onEnd) ->
+    @_deferred.promise.then onEnd
 
-  _requestAnimationFrame: ->
-    if not @_animationFrame
-      @_animationFrame = requestAnimationFrame @_recomputeValue
-    return
+  _requestAnimationFrame: (callback) ->
+    @_animationFrame or @_animationFrame = injected.call "requestAnimationFrame", callback or @_recomputeValue
 
   _cancelAnimationFrame: ->
     if @_animationFrame
-      cancelAnimationFrame @_animationFrame
+      injected.call "cancelAnimationFrame", @_animationFrame
       @_animationFrame = null
+    return
+
+  _startAnimation: (animated) ->
+    @startTime = Date.now()
+    if @fromValue?
+    then animated._updateValue @fromValue
+    else @fromValue = animated._value
+    @__onAnimationStart animated
+
+  _startNativeAnimation: (animated) ->
+    @_nativeTag = NativeAnimated.createAnimationTag()
+    animated.__markNative()
+    animatedTag = animated.__getNativeTag()
+    animationConfig = @__getNativeConfig()
+    NativeAnimated.addUpdateListener animated
+    NativeAnimated.startAnimatingNode @_nativeTag, animatedTag, animationConfig, (data) =>
+      return if @isDone
+      @_state += 1
+      @_onEnd data.finished
+      return
+
+  _stopAnimation: (finished) ->
+    return if @isDone
+    @_state += 1
+    if @_nativeTag
+    then NativeAnimated.stopAnimation @_nativeTag
+    else @_cancelAnimationFrame()
+    @_onEnd finished
     return
 
   _captureFrame: ->
     frame = @__captureFrame()
     assertType frame, Object
     @_frames.push frame
+    return
 
-type.defineBoundMethods
-
-  _recomputeValue: ->
-
-    @_animationFrame = null
-    return if @isDone
-
-    value = @__computeValue()
+  _assertNumber: (value) ->
     assertType value, Number
 
-    @_onUpdate value
-    @__didUpdate value
+  _createInteraction: ->
+    injected.get("InteractionManager").createInteractionHandle()
 
-    return if @isDone
-    @_requestAnimationFrame()
-    @_captureFrame()
+  _clearInteraction: (handle) ->
+    handle? and injected.get("InteractionManager").clearInteractionHandle handle
 
 module.exports = Animation = type.build()
