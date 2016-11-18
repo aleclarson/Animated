@@ -4,6 +4,7 @@
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
 LazyVar = require "LazyVar"
+Promise = require "Promise"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
@@ -40,6 +41,8 @@ type.defineValues (options) ->
   startTime: null
 
   fromValue: options.fromValue ? null
+
+  _deferred: Promise.defer()
 
   _state: 0
 
@@ -130,12 +133,16 @@ type.defineMethods
 
       @__onAnimationEnd finished
       onEnd finished
+      @_deferred.resolve finished
 
     @_startAnimation animated
     return this
 
   stop: (finished = no) ->
     @_stopAnimation finished
+
+  then: (onEnd) ->
+    @_deferred.promise.then onEnd
 
   _requestAnimationFrame: (callback) ->
     @_animationFrame or @_animationFrame = injected.call "requestAnimationFrame", callback or @_recomputeValue
