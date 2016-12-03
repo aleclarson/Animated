@@ -25,7 +25,7 @@ type.initInstance (_, options) ->
 
 type.defineValues (value) ->
 
-  didSet: Event {async: no}
+  didSet: Event.sync()
 
   _dep: Tracker.Dependency()
 
