@@ -89,15 +89,6 @@ type.defineMethods
       NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
     return
 
-  react: (get) ->
-    assertType get, Function
-    reaction = Reaction get
-    reactor = reaction.didSet @_updateValue
-    reactor._onDetach = -> reaction.stop()
-    reactor.start()
-    reaction.start()
-    return reactor
-
   animate: (config) ->
     assertType config, Object
 
