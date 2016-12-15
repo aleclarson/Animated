@@ -1,7 +1,6 @@
 
 assertType = require "assertType"
 clampValue = require "clampValue"
-Reaction = require "Reaction"
 Tracker = require "tracker"
 Event = require "Event"
 isDev = require "isDev"
