@@ -15,7 +15,7 @@ type.inherits AnimatedWithChildren
 
 type.defineFrozenValues
 
-  didSet: -> Event {async: no}
+  didSet: -> Event()
 
 type.defineValues (values) ->
 

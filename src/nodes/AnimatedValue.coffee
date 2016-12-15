@@ -1,7 +1,6 @@
 
 assertType = require "assertType"
 clampValue = require "clampValue"
-Reaction = require "Reaction"
 Tracker = require "tracker"
 Event = require "Event"
 isDev = require "isDev"
@@ -25,7 +24,10 @@ type.initInstance (_, options) ->
 
 type.defineValues (value) ->
 
-  didSet: Event {async: no}
+  didSet: Event()
+
+  didEnd: Event
+    argTypes: {finished: Boolean}
 
   _dep: Tracker.Dependency()
 
@@ -89,15 +91,6 @@ type.defineMethods
       NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
     return
 
-  react: (get) ->
-    assertType get, Function
-    reaction = Reaction get
-    reactor = reaction.didSet @_updateValue
-    reactor._onDetach = -> reaction.stop()
-    reactor.start()
-    reaction.start()
-    return reactor
-
   animate: (config) ->
     assertType config, Object
 
@@ -116,14 +109,10 @@ type.defineMethods
       type = Animation.types[type]
 
     if onUpdate = steal config, "onUpdate"
-      isDev and assertType onUpdate, Function
-      updater = @didSet(onUpdate).start()
+      onUpdate = @didSet(onUpdate).start()
 
-    onFinish = steal config, "onFinish", emptyFunction
-    isDev and assertType onFinish, Function
-
-    onEnd = steal config, "onEnd", emptyFunction
-    isDev and assertType onEnd, Function
+    if onEnd = steal config, "onEnd"
+      onEnd = @didEnd(1, onEnd).start()
 
     config.useNativeDriver ?= @__isNative
     unless config.useNativeDriver
@@ -134,9 +123,8 @@ type.defineMethods
 
     @_animation = animation.start this, (finished) =>
       @_animation = null
-      updater?.detach()
-      onFinish() if finished
-      onEnd finished
+      onUpdate?.detach()
+      @didEnd.emit finished
 
   stopAnimation: ->
     if @_animation
