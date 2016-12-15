@@ -77,6 +77,7 @@ type.overrideMethods
 
     props = {}
     for key, animatedValue of @__animatedValues
+      continue unless animatedValue.__isNative
       props[key] = animatedValue.__getNativeTag()
 
     isDev and NativeAnimated.validateProps props
