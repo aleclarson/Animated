@@ -10,7 +10,7 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "Event": "aleclarson/Event#2.2.0",
+    "Event": "aleclarson/Event#3.0.0",
     "InjectableMap": "aleclarson/InjectableMap#1.1.0",
     "LazyMap": "aleclarson/LazyMap#1.0.1",
     "LazyVar": "aleclarson/LazyVar#2.1.1",
