@@ -26,6 +26,9 @@ type.defineValues (value) ->
 
   didSet: Event()
 
+  didEnd: Event
+    argTypes: {finished: Boolean}
+
   _dep: Tracker.Dependency()
 
   _value: value
@@ -106,14 +109,10 @@ type.defineMethods
       type = Animation.types[type]
 
     if onUpdate = steal config, "onUpdate"
-      isDev and assertType onUpdate, Function
-      updater = @didSet(onUpdate).start()
+      onUpdate = @didSet(onUpdate).start()
 
-    onFinish = steal config, "onFinish", emptyFunction
-    isDev and assertType onFinish, Function
-
-    onEnd = steal config, "onEnd", emptyFunction
-    isDev and assertType onEnd, Function
+    if onEnd = steal config, "onEnd"
+      onEnd = @didEnd(1, onEnd).start()
 
     config.useNativeDriver ?= @__isNative
     unless config.useNativeDriver
@@ -124,9 +123,8 @@ type.defineMethods
 
     @_animation = animation.start this, (finished) =>
       @_animation = null
-      updater?.detach()
-      onFinish() if finished
-      onEnd finished
+      onUpdate?.detach()
+      @didEnd.emit finished
 
   stopAnimation: ->
     if @_animation
