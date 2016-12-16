@@ -38,7 +38,8 @@ type.overrideMethods
 
     style = {}
     for key, animatedValue of @__animatedValues
-      style[key] = animatedValue.__getNativeTag()
+      if animatedValue.__isNative
+        style[key] = animatedValue.__getNativeTag()
 
     isDev and NativeAnimated.validateStyle style
     return {type: "style", style}
