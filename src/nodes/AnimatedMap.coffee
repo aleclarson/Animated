@@ -32,7 +32,6 @@ type.defineMethods
   attach: (newValues) ->
     @__detachOldValues newValues
     @__attachNewValues newValues
-    @__attach()
     return
 
   detach: ->
