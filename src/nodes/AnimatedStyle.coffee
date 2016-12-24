@@ -10,9 +10,6 @@ type = Type "AnimatedStyle"
 
 type.inherits AnimatedMap
 
-type.createInstance ->
-  return AnimatedMap {}
-
 type.overrideMethods
 
   attach: (newValues) ->

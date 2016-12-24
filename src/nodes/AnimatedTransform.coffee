@@ -13,9 +13,6 @@ type = Type "AnimatedTransform"
 
 type.inherits AnimatedMap
 
-type.createInstance ->
-  return AnimatedMap {}
-
 type.definePrototype
 
   __isAnimatedTransform: yes

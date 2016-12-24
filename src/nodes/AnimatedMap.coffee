@@ -17,9 +17,9 @@ type.defineFrozenValues
 
   didSet: -> Event()
 
-type.defineValues (values) ->
+type.defineValues ->
 
-  __values: values
+  __values: {}
 
   __animatedValues: {}
 
