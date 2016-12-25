@@ -34,16 +34,6 @@ type.defineMethods
     @__attachNewValues newValues
     return
 
-  detach: ->
-
-    for key, animatedValue of @_animatedValues
-      animatedValue.__removeChild this
-
-    @__values = {}
-    @__animatedValues = {}
-    @__detach()
-    return
-
 type.overrideMethods
 
   __updateChildren: (value) ->
@@ -115,20 +105,44 @@ type.defineHooks
   # Detaching values
   #
 
-  __detachOldValues: (newValues) ->
+  # Completely resets the `AnimatedMap` node.
+  __detachAllValues: ->
+
+    for key, animatedValue of @_animatedValues
+      animatedValue.__removeChild this
+
+    @__values = {}
+    @__animatedValues = {}
+    return
+
+  # Detaches an `Animated` node if it has a new value.
+  __detachAnimatedValue: (animatedValue, newValue) ->
+
+    # Since `AnimatedMap` nodes are created internally,
+    # we don't bother checking object equivalence.
+    if animatedValue.__isAnimatedMap
+
+      if newValue?
+        # Traverse `AnimatedMap` nodes recursively.
+        animatedValue.__detachAnimatedValues newValue
+        return
+
+      # Perform cleanup on detached `AnimatedMap` nodes.
+      animatedValue.__detachAllValues()
+
+    else
+      # Abort if the same `AnimatedValue` node was passed.
+      return if animatedValue is newValue
+
+    animatedValue.__removeChild this
+    delete @__animatedValues[key]
+
+  # Detaches any `Animated` nodes that have new values.
+  __detachAnimatedValues: (newValues) ->
     assertType newValues, Object
     animatedValues = @__animatedValues
     for key, animatedValue of animatedValues
-      hasChanged = animatedValue isnt newValues[key]
-
-      if animatedValue.__isAnimatedMap
-        if hasChanged
-        then animatedValue.detach()
-        else animatedValue.__detachOldValues newValues[key]
-
-      if hasChanged
-        animatedValue.__removeChild this
-        delete animatedValues[key]
+      @__detachAnimatedValue animatedValue, newValues[key]
     return
 
 module.exports = AnimatedMap = type.build()
