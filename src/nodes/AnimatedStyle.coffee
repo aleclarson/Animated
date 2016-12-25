@@ -13,11 +13,7 @@ type.inherits AnimatedMap
 type.overrideMethods
 
   attach: (newValues) ->
-
-    if Array.isArray newValues
-      newValues = flattenStyle newValues
-
-    @__super arguments
+    @__super [flattenStyle newValues]
     return this
 
   __attachValue: (value, key) ->
@@ -29,6 +25,14 @@ type.overrideMethods
       return
 
     @__super arguments
+    return
+
+  __detachAnimatedValues: (newValues) ->
+    @__super [flattenStyle newValues]
+    return
+
+  __attachNewValues: (newValues) ->
+    @__super [flattenStyle newValues]
     return
 
   __getNativeConfig: ->
