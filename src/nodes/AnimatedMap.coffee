@@ -17,9 +17,9 @@ type.defineFrozenValues
 
   didSet: -> Event()
 
-type.defineValues (values) ->
+type.defineValues ->
 
-  __values: values
+  __values: {}
 
   __animatedValues: {}
 
@@ -29,23 +29,16 @@ type.definePrototype
 
 type.defineMethods
 
+  # Pre-existing static values are not clobbered.
   attach: (newValues) ->
-    @__detachOldValues newValues
+    @__detachAnimatedValues newValues
     @__attachNewValues newValues
-    @__attach()
-    return
-
-  detach: ->
-
-    for key, animatedValue of @_animatedValues
-      animatedValue.__removeChild this
-
-    @__values = {}
-    @__animatedValues = {}
-    @__detach()
     return
 
 type.overrideMethods
+
+  __getValue: ->
+    return @__getAllValues()
 
   __updateChildren: (value) ->
     @__super arguments
@@ -53,30 +46,34 @@ type.overrideMethods
 
 type.defineHooks
 
-  __getInitialValue: ->
+  # Returns an object of all values (including native values).
+  # This should be used when creating a new `ReactElement`.
+  __getAllValues: ->
     values = {}
     for key, value of @__values
       values[key] =
         if animatedValue = @__animatedValues[key]
-          if animatedValue.__isAnimatedMap
-          then animatedValue.__getInitialValue()
-          else animatedValue._value
+        then animatedValue.__getValue()
         else value
     return values
 
-  __getValue: do ->
+  # Returns an object of all values (except native values).
+  # This should be used when re-rendering an existing `ReactElement`.
+  __getNonNativeValues: do ->
 
+    # `AnimatedMap` nodes can be partially native, while `AnimatedValue`
+    # and `AnimatedTransform` nodes cannot be partially native.
     isNative = (animatedValue) ->
-      if animatedValue.__isAnimatedMap
-      then animatedValue.__isAnimatedTransform
-      else animatedValue.__isNative
+      return no unless animatedValue.__isNative
+      return yes unless animatedValue.__isAnimatedMap
+      return animatedValue.__isAnimatedTransform
 
     return ->
       values = {}
       for key, value of @__values
         if animatedValue = @__animatedValues[key]
-          continue if isNative animatedValue
-          values[key] = animatedValue.__getValue()
+          unless isNative animatedValue
+            values[key] = animatedValue.__getValue()
         else values[key] = value
       return values
 
@@ -116,20 +113,44 @@ type.defineHooks
   # Detaching values
   #
 
-  __detachOldValues: (newValues) ->
+  # Completely resets the `AnimatedMap` node.
+  __detachAllValues: ->
+
+    for key, animatedValue of @_animatedValues
+      animatedValue.__removeChild this
+
+    @__values = {}
+    @__animatedValues = {}
+    return
+
+  # Detaches an `Animated` node if it has a new value.
+  __detachAnimatedValue: (animatedValue, newValue) ->
+
+    # Since `AnimatedMap` nodes are created internally,
+    # we don't bother checking object equivalence.
+    if animatedValue.__isAnimatedMap
+
+      if newValue?
+        # Traverse `AnimatedMap` nodes recursively.
+        animatedValue.__detachAnimatedValues newValue
+        return
+
+      # Perform cleanup on detached `AnimatedMap` nodes.
+      animatedValue.__detachAllValues()
+
+    else
+      # Abort if the same `AnimatedValue` node was passed.
+      return if animatedValue is newValue
+
+    animatedValue.__removeChild this
+    delete @__animatedValues[key]
+
+  # Detaches any `Animated` nodes that have new values.
+  __detachAnimatedValues: (newValues) ->
     assertType newValues, Object
     animatedValues = @__animatedValues
     for key, animatedValue of animatedValues
-      hasChanged = animatedValue isnt newValues[key]
-
-      if animatedValue.__isAnimatedMap
-        if hasChanged
-        then animatedValue.detach()
-        else animatedValue.__detachOldValues newValues[key]
-
-      if hasChanged
-        animatedValue.__removeChild this
-        delete animatedValues[key]
+      @__detachAnimatedValue animatedValue, newValues[key]
     return
 
 module.exports = AnimatedMap = type.build()

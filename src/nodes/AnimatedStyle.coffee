@@ -10,17 +10,10 @@ type = Type "AnimatedStyle"
 
 type.inherits AnimatedMap
 
-type.createInstance ->
-  return AnimatedMap {}
-
 type.overrideMethods
 
   attach: (newValues) ->
-
-    if Array.isArray newValues
-      newValues = flattenStyle newValues
-
-    @__super arguments
+    @__super [flattenStyle newValues]
     return this
 
   __attachValue: (value, key) ->
@@ -34,11 +27,20 @@ type.overrideMethods
     @__super arguments
     return
 
+  __detachAnimatedValues: (newValues) ->
+    @__super [flattenStyle newValues]
+    return
+
+  __attachNewValues: (newValues) ->
+    @__super [flattenStyle newValues]
+    return
+
   __getNativeConfig: ->
 
     style = {}
     for key, animatedValue of @__animatedValues
-      style[key] = animatedValue.__getNativeTag()
+      if animatedValue.__isNative
+        style[key] = animatedValue.__getNativeTag()
 
     isDev and NativeAnimated.validateStyle style
     return {type: "style", style}

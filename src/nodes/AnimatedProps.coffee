@@ -17,9 +17,6 @@ type.inherits AnimatedMap
 type.defineArgs
   propTypes: Object
 
-type.createInstance ->
-  return AnimatedMap {}
-
 type.defineValues (propTypes) ->
 
   _propTypes: propTypes or {}

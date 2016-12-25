@@ -87,7 +87,7 @@ type.defineMethods
   set: (value) ->
     @stopAnimation()
     @_updateValue value, @__isNative
-    if @__isNative
+    if @__isNative and @_children.length
       NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
     return
 
