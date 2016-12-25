@@ -19,22 +19,25 @@ type.definePrototype
 
 type.overrideMethods
 
-  __getInitialValue: -> @__getValue()
+  __getAllValues: ->
 
-  __getValue: ->
     transforms = []
 
     for key, value of @__values
       [index, key] = key.split "."
-      transform = transforms[index] = {}
+      transforms[index] = transform = {}
       transform[key] = value
 
     for key, animatedValue of @__animatedValues
       [index, key] = key.split "."
-      transform = transforms[index] = {}
+      transforms[index] = transform = {}
       transform[key] = animatedValue.__getValue()
 
     return transforms
+
+  # If an `AnimatedTransform` node has a native value, all values are considered native.
+  __getNonNativeValues: ->
+    throw Error "AnimatedTransform::__getNonNativeValues is not supported"
 
   __attachNewValues: (transforms) ->
     assertType transforms, Array
@@ -51,8 +54,10 @@ type.overrideMethods
       else @__values[key] = value
     return
 
-  __detachOldValues: ->
-    @detach()
+  # When an `AnimatedTransform` updates its value,
+  # all previous `Animated` nodes are detached.
+  __detachAnimatedValues: ->
+    @__detachAllValues()
 
   __onParentUpdate: ->
     @__updateChildren @__getValue()

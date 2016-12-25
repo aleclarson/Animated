@@ -29,12 +29,16 @@ type.definePrototype
 
 type.defineMethods
 
+  # Pre-existing static values are not clobbered.
   attach: (newValues) ->
-    @__detachOldValues newValues
+    @__detachAnimatedValues newValues
     @__attachNewValues newValues
     return
 
 type.overrideMethods
+
+  __getValue: ->
+    return @__getAllValues()
 
   __updateChildren: (value) ->
     @__super arguments
@@ -42,30 +46,34 @@ type.overrideMethods
 
 type.defineHooks
 
-  __getInitialValue: ->
+  # Returns an object of all values (including native values).
+  # This should be used when creating a new `ReactElement`.
+  __getAllValues: ->
     values = {}
     for key, value of @__values
       values[key] =
         if animatedValue = @__animatedValues[key]
-          if animatedValue.__isAnimatedMap
-          then animatedValue.__getInitialValue()
-          else animatedValue._value
+        then animatedValue.__getValue()
         else value
     return values
 
-  __getValue: do ->
+  # Returns an object of all values (except native values).
+  # This should be used when re-rendering an existing `ReactElement`.
+  __getNonNativeValues: do ->
 
+    # `AnimatedMap` nodes can be partially native, while `AnimatedValue`
+    # and `AnimatedTransform` nodes cannot be partially native.
     isNative = (animatedValue) ->
-      if animatedValue.__isAnimatedMap
-      then animatedValue.__isAnimatedTransform
-      else animatedValue.__isNative
+      return no unless animatedValue.__isNative
+      return yes unless animatedValue.__isAnimatedMap
+      return animatedValue.__isAnimatedTransform
 
     return ->
       values = {}
       for key, value of @__values
         if animatedValue = @__animatedValues[key]
-          continue if isNative animatedValue
-          values[key] = animatedValue.__getValue()
+          unless isNative animatedValue
+            values[key] = animatedValue.__getValue()
         else values[key] = value
       return values
 
