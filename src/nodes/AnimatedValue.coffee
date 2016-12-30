@@ -94,6 +94,9 @@ type.defineMethods
   animate: (config) ->
     assertType config, Object
 
+    # Clone the `config` so it can be reused.
+    config = Object.assign {}, config
+
     if isDev and @__isNative
       unless @didSet.hasListeners or @_children.length
         return log.warn "Must have listeners or animated children!"
