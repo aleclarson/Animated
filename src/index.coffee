@@ -1,4 +1,5 @@
 
+require "LazyVar"
 LazyMap = require "LazyMap"
 
 module.exports = LazyMap
