@@ -59,7 +59,7 @@ type.overrideMethods
   __detachAnimatedValues: ->
     @__detachAllValues()
 
-  __onParentUpdate: ->
+  __updateValue: ->
     @__updateChildren @__getValue()
 
   __getNativeConfig: ->

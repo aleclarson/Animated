@@ -29,11 +29,12 @@ type.overrideMethods
     return
 
   __updateChildren: (value) ->
-    for child, index in @__getChildren()
-      child.__onParentUpdate value, @_childKeys[index]
+    children = @__getChildren()
+    for child, index in children
+      child.__updateValue value, @_childKeys[index]
     return
 
-  __onParentUpdate: (value, key) ->
+  __updateValue: (value, key) ->
     newValues = {}
     newValues[key] = value
     @__updateChildren newValues

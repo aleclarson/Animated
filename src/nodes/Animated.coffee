@@ -32,7 +32,7 @@ type.defineHooks
 
   __updateChildren: emptyFunction
 
-  __onParentUpdate: emptyFunction
+  __updateValue: emptyFunction
 
   __markNative: ->
     unless @__isNative
