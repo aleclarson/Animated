@@ -63,9 +63,6 @@ type.overrideMethods
     return if @__isNative
     @__isNative = yes
 
-    for key, animatedValue of @_animatedValues
-      animatedValue.__markNative()
-
     if @_animatedView
       @_connectAnimatedView()
     return
