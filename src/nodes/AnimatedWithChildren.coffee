@@ -20,11 +20,15 @@ type.overrideMethods
     return @_children
 
   __addChild: (child, key) ->
-    @__attach() if @_children.length is 0
+
+    # Native nodes cannot have non-native children.
+    @__isNative and child.__markNative()
+
     @_children.push child
     @_childKeys.push key
-    if @__isNative
-      child.__markNative() # Native nodes cannot have non-native children.
+
+    if @_children.length is 0
+      @__attach()
     return
 
   __updateChildren: (value) ->
@@ -39,19 +43,27 @@ type.overrideMethods
     @__updateChildren newValues
 
   __removeChild: (child) ->
+
     index = @_children.indexOf child
     return if index < 0
+
     if @__isNative and child.__isNative
       NativeAnimated.disconnectAnimatedNodes @__getNativeTag(), child.__getNativeTag()
+
     @_children.splice index, 1
     @_childKeys.splice index, 1
-    @__detach() if @_children.length is 0
+
+    if @_children.length is 0
+      @__detach()
     return
 
   __markNative: ->
+
     return if @__isNative
     @__isNative = yes
-    for child, index in @_children
+
+    children = @_children
+    for child, index in children
       child.__markNative() # Native nodes cannot have non-native children.
     return
 

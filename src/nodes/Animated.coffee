@@ -39,6 +39,9 @@ type.defineHooks
       throw Error "This animated node is not supported by the native animated module!"
 
   __getNativeTag: ->
+    @__nativeTag or @__createNativeTag()
+
+  __createNativeTag: ->
 
     unless NativeAnimated.isAvailable
       throw Error "Failed to load NativeAnimatedModule!"
@@ -46,10 +49,8 @@ type.defineHooks
     unless @__isNative
       throw Error "Must call '__markNative' before '__getNativeTag'!"
 
-    unless tag = @__nativeTag
-      @__nativeTag = tag = NativeAnimated.createAnimatedTag()
-      NativeAnimated.createAnimatedNode tag, @__getNativeConfig()
-
+    @__nativeTag = tag = NativeAnimated.createAnimatedTag()
+    NativeAnimated.createAnimatedNode tag, @__getNativeConfig()
     return tag
 
   __getNativeConfig: ->

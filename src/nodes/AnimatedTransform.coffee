@@ -28,10 +28,11 @@ type.overrideMethods
       transforms[index] = transform = {}
       transform[key] = value
 
-    for key, animatedValue of @__animatedValues
+    animatedValues = @__animatedValues
+    for key, value of animatedValues
       [index, key] = key.split "."
       transforms[index] = transform = {}
-      transform[key] = animatedValue.__getValue()
+      transform[key] = value.__getValue()
 
     return transforms
 
@@ -71,9 +72,10 @@ type.overrideMethods
       transforms[index] = {type, property, value}
 
     type = "animated"
-    for key, animatedValue of @__animatedValues
+    animatedValues = @__animatedValues
+    for key, value of animatedValues
       [index, property] = key.split "."
-      nodeTag = animatedValue.__getNativeTag()
+      nodeTag = value.__getNativeTag()
       transforms[index] = {type, property, nodeTag}
 
     isDev and NativeAnimated.validateTransform transforms

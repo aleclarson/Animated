@@ -161,8 +161,8 @@ type.defineHooks
   __detachAnimatedValues: (newValues) ->
     assertType newValues, Object
     animatedValues = @__animatedValues
-    for key, animatedValue of animatedValues
-      @__detachAnimatedValue animatedValue, newValues[key]
+    for key, value of animatedValues
+      @__detachAnimatedValue value, newValues[key]
     return
 
 module.exports = AnimatedMap = type.build()
