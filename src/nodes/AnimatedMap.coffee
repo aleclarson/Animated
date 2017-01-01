@@ -5,6 +5,7 @@ Event = require "Event"
 Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
+NativeAnimated = require "../NativeAnimated"
 AnimatedStyle = require "./AnimatedStyle"
 AnimatedValue = require "./AnimatedValue"
 Animated = require "./Animated"
@@ -33,6 +34,7 @@ type.defineMethods
   attach: (newValues) ->
     @__detachAnimatedValues newValues
     @__attachNewValues newValues
+    @__isNative and @__connectNativeValues()
     return
 
 type.overrideMethods
@@ -107,6 +109,16 @@ type.defineHooks
     @__values[key] = undefined # <= Preserve key order within this.__values
     @__animatedValues[key] = animatedValue
     animatedValue.__addChild this, key
+    return
+
+  __connectNativeValues: ->
+    animatedValues = @__animatedValues
+    nativeTags = []
+    for key, value of animatedValues
+      continue unless value.__isNative
+      nativeTags.push value.__getNativeTag()
+    if nativeTags.length
+      NativeAnimated.connectAnimatedNodes nativeTags, @__getNativeTag()
     return
 
   #

@@ -25,7 +25,6 @@ type.overrideMethods
     @_childKeys.push key
     if @__isNative
       child.__markNative() # Native nodes cannot have non-native children.
-      NativeAnimated.connectAnimatedNodes @__getNativeTag(), child.__getNativeTag()
     return
 
   __updateChildren: (value) ->
@@ -54,7 +53,6 @@ type.overrideMethods
     @__isNative = yes
     for child, index in @_children
       child.__markNative() # Native nodes cannot have non-native children.
-      NativeAnimated.connectAnimatedNodes @__getNativeTag(), child.__getNativeTag()
     return
 
 module.exports = type.build()
