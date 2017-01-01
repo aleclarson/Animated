@@ -5,6 +5,7 @@ Event = require "Event"
 Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
+NativeAnimated = require "../NativeAnimated"
 AnimatedStyle = require "./AnimatedStyle"
 AnimatedValue = require "./AnimatedValue"
 Animated = require "./Animated"
@@ -33,6 +34,7 @@ type.defineMethods
   attach: (newValues) ->
     @__detachAnimatedValues newValues
     @__attachNewValues newValues
+    @__isNative and @__connectNativeValues()
     return
 
 type.overrideMethods
@@ -109,6 +111,16 @@ type.defineHooks
     animatedValue.__addChild this, key
     return
 
+  __connectNativeValues: ->
+    animatedValues = @__animatedValues
+    nativeTags = []
+    for key, value of animatedValues
+      continue unless value.__isNative
+      nativeTags.push value.__getNativeTag()
+    if nativeTags.length
+      NativeAnimated.connectAnimatedNodes nativeTags, @__getNativeTag()
+    return
+
   #
   # Detaching values
   #
@@ -149,8 +161,8 @@ type.defineHooks
   __detachAnimatedValues: (newValues) ->
     assertType newValues, Object
     animatedValues = @__animatedValues
-    for key, animatedValue of animatedValues
-      @__detachAnimatedValue animatedValue, newValues[key]
+    for key, value of animatedValues
+      @__detachAnimatedValue value, newValues[key]
     return
 
 module.exports = AnimatedMap = type.build()

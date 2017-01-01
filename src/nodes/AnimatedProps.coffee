@@ -63,9 +63,6 @@ type.overrideMethods
     return if @__isNative
     @__isNative = yes
 
-    for key, animatedValue of @_animatedValues
-      animatedValue.__markNative()
-
     if @_animatedView
       @_connectAnimatedView()
     return
@@ -73,9 +70,10 @@ type.overrideMethods
   __getNativeConfig: ->
 
     props = {}
-    for key, animatedValue of @__animatedValues
-      continue unless animatedValue.__isNative
-      props[key] = animatedValue.__getNativeTag()
+    animatedValues = @__animatedValues
+    for key, value of animatedValues
+      continue unless value.__isNative
+      props[key] = value.__getNativeTag()
 
     isDev and NativeAnimated.validateProps props
     return {type: "props", props}
