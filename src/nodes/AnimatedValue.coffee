@@ -2,6 +2,7 @@
 assertType = require "assertType"
 clampValue = require "clampValue"
 Tracker = require "tracker"
+isType = require "isType"
 Event = require "Event"
 isDev = require "isDev"
 steal = require "steal"
@@ -25,9 +26,6 @@ type.initInstance (_, options) ->
 type.defineValues (value) ->
 
   didSet: Event()
-
-  didEnd: Event
-    argTypes: {finished: Boolean}
 
   _dep: Tracker.Dependency()
 
@@ -96,38 +94,25 @@ type.defineMethods
 
     # Clone the `config` so it can be reused.
     config = Object.assign {}, config
+    config.useNativeDriver ?= @__isNative
 
-    if isDev and @__isNative
+    if isDev and config.useNativeDriver
       unless @didSet.hasListeners or @_children.length
         return log.warn "Must have listeners or animated children!"
 
-    type = steal config, "type"
-    isDev and assertType type, String.or Function.Kind
+    animationType = steal config, "type"
+    isDev and assertType animationType, String.or Function.Kind
 
-    if isType type, String
+    if isType animationType, String
+      if isDev and not Animation.types[animationType]
+        throw Error "Unrecognized animation type: '#{animationType}'"
+      animationType = Animation.types[animationType]
 
-      if isDev and not Animation.types[type]
-        throw Error "Invalid animation type: '#{type}'"
-
-      type = Animation.types[type]
-
-    if onUpdate = steal config, "onUpdate"
-      onUpdate = @didSet(onUpdate).start()
-
-    if onEnd = steal config, "onEnd"
-      onEnd = @didEnd(1, onEnd).start()
-
-    config.useNativeDriver ?= @__isNative
-    unless config.useNativeDriver
-      config.onUpdate = @_updateValue
-
-    animation = type config
+    animation = animationType config
     isDev and assertType animation, Animation.Kind
 
-    @_animation = animation.start this, (finished) =>
-      @_animation = null
-      onUpdate?.detach()
-      @didEnd.emit finished
+    animation.then config.onEnd if config.onEnd
+    return animation.start this, config.onUpdate
 
   stopAnimation: ->
     if @_animation

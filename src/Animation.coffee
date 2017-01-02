@@ -4,6 +4,7 @@
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
 LazyVar = require "LazyVar"
+isDev = require "isDev"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
@@ -109,9 +110,9 @@ type.defineHooks
 
 type.defineMethods
 
-  start: (animated, onEnd) ->
+  start: (animated, onUpdate) ->
     assertType animated, AnimatedValue.get()
-    assertType onEnd, Function
+    assertType onUpdate, Function.Maybe
 
     return this unless @isPending
     @_state += 1
@@ -122,17 +123,34 @@ type.defineMethods
     if @_isInteraction
       id = @_createInteraction()
 
+    animation = animated._animation
+    animation?.stop()
+    @_previousAnimation = animation
+
+    if onUpdate
+      onUpdate = animated
+        .didSet onUpdate
+        .start()
+
+    unless @_useNativeDriver
+      @_onUpdate = (newValue) ->
+        animated._updateValue newValue, no
+
     @_onEnd = (finished) =>
       @_onEnd = emptyFunction
-      @_clearInteraction id
+      @_onUpdate = emptyFunction
 
+      animated._animation = null
+      onUpdate?.detach()
       if @_useNativeDriver
         NativeAnimated.removeUpdateListener animated
 
+      @_clearInteraction id
       @__onAnimationEnd finished
-      onEnd finished
       @_flushEndQueue finished
+      return
 
+    animated._animation = this
     @_startAnimation animated
     return this
 
