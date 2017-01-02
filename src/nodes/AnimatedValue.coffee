@@ -2,6 +2,7 @@
 assertType = require "assertType"
 clampValue = require "clampValue"
 Tracker = require "tracker"
+isType = require "isType"
 Event = require "Event"
 isDev = require "isDev"
 steal = require "steal"
@@ -9,7 +10,6 @@ Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
 NativeAnimated = require "../NativeAnimated"
-AnimationPath = require "../AnimationPath"
 Animation = require "../Animation"
 
 injected = require "../injectable"
@@ -26,9 +26,6 @@ type.defineValues (value) ->
 
   didSet: Event()
 
-  didEnd: Event
-    argTypes: {finished: Boolean}
-
   _dep: Tracker.Dependency()
 
   _value: value
@@ -36,16 +33,6 @@ type.defineValues (value) ->
 type.defineReactiveValues
 
   _animation: null
-
-type.defineBoundMethods
-
-  _updateValue: (value, isNative) ->
-    oldValue = @_value
-    return if value is oldValue
-    @_value = value
-    @__updateChildren value unless isNative
-    @_dep.changed()
-    @didSet.emit value, oldValue
 
 type.definePrototype
 
@@ -84,11 +71,11 @@ type.defineMethods
     @_dep.depend() if Tracker.isActive
     return @_value
 
-  set: (value) ->
+  set: (newValue) ->
     @stopAnimation()
-    @_updateValue value, @__isNative
-    if @__isNative and @_children.length
-      NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
+    if @_updateValue newValue, @__isNative
+      if @__isNative and @_children.length
+        NativeAnimated.setAnimatedNodeValue @__getNativeTag(), newValue
     return
 
   animate: (config) ->
@@ -96,38 +83,25 @@ type.defineMethods
 
     # Clone the `config` so it can be reused.
     config = Object.assign {}, config
+    config.useNativeDriver ?= @__isNative
 
-    if isDev and @__isNative
+    if isDev and config.useNativeDriver
       unless @didSet.hasListeners or @_children.length
         return log.warn "Must have listeners or animated children!"
 
-    type = steal config, "type"
-    isDev and assertType type, String.or Function.Kind
+    animationType = steal config, "type"
+    isDev and assertType animationType, String.or Function.Kind
 
-    if isType type, String
+    if isType animationType, String
+      if isDev and not Animation.types[animationType]
+        throw Error "Unrecognized animation type: '#{animationType}'"
+      animationType = Animation.types[animationType]
 
-      if isDev and not Animation.types[type]
-        throw Error "Invalid animation type: '#{type}'"
-
-      type = Animation.types[type]
-
-    if onUpdate = steal config, "onUpdate"
-      onUpdate = @didSet(onUpdate).start()
-
-    if onEnd = steal config, "onEnd"
-      onEnd = @didEnd(1, onEnd).start()
-
-    config.useNativeDriver ?= @__isNative
-    unless config.useNativeDriver
-      config.onUpdate = @_updateValue
-
-    animation = type config
+    animation = animationType config
     isDev and assertType animation, Animation.Kind
 
-    @_animation = animation.start this, (finished) =>
-      @_animation = null
-      onUpdate?.detach()
-      @didEnd.emit finished
+    animation.then config.onEnd if config.onEnd
+    return animation.start this, config.onUpdate
 
   stopAnimation: ->
     if @_animation
@@ -135,23 +109,16 @@ type.defineMethods
       @_animation = null
     return
 
-  createPath: (values) ->
-    assertType values, Array
-    path = AnimationPath()
-    path.listener = @didSet (newValue) ->
-      index = -1
-      maxIndex = values.length - 1
-      while newValue >= values[++index]
-        break if index is maxIndex
-      fromValue = values[index - 1]
-      if fromValue is undefined
-        index += 1
-        progress = 0
-      else
-        progress = (newValue - fromValue) / (values[index] - fromValue)
-        progress = clampValue progress, 0, 1
-      path._update index - 1, progress
-      return
-    return path
+  _updateValue: (newValue, isNative) ->
+
+    return no if newValue is oldValue = @_value
+    @_value = newValue
+
+    unless isNative
+      @__updateChildren newValue
+
+    @_dep.changed()
+    @didSet.emit newValue, oldValue
+    return yes
 
 module.exports = type.build()

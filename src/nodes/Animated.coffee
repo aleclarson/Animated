@@ -32,8 +32,6 @@ type.defineHooks
 
   __updateChildren: emptyFunction
 
-  __updateValue: emptyFunction
-
   __markNative: ->
     unless @__isNative
       throw Error "This animated node is not supported by the native animated module!"

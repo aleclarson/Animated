@@ -34,13 +34,14 @@ type.overrideMethods
   __updateChildren: (value) ->
     children = @__getChildren()
     for child, index in children
-      child.__updateValue value, @_childKeys[index]
+      if child.__isAnimatedTransform
+        update = child.__getAllValues()
+      else
+        key = @_childKeys[index]
+        update = {}
+        update[key] = value
+      child.__updateChildren update
     return
-
-  __updateValue: (value, key) ->
-    newValues = {}
-    newValues[key] = value
-    @__updateChildren newValues
 
   __removeChild: (child) ->
 

@@ -4,7 +4,7 @@
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
 LazyVar = require "LazyVar"
-Promise = require "Promise"
+isDev = require "isDev"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
@@ -25,7 +25,6 @@ type.defineOptions
   isInteraction: Boolean.withDefault yes
   useNativeDriver: Boolean.withDefault no
   captureFrames: Boolean.withDefault no
-  onUpdate: Function.withDefault emptyFunction
 
 type.initArgs do ->
   hasWarned = no
@@ -42,8 +41,6 @@ type.defineValues (options) ->
 
   fromValue: options.fromValue ? null
 
-  _deferred: Promise.defer()
-
   _state: 0
 
   _isInteraction: options.isInteraction
@@ -56,9 +53,11 @@ type.defineValues (options) ->
 
   _previousAnimation: null
 
-  _onUpdate: options.onUpdate
+  _onUpdate: emptyFunction
 
-  _onEnd: null
+  _onEnd: emptyFunction
+
+  _onEndQueue: []
 
   _frames: [] if options.captureFrames
 
@@ -111,38 +110,56 @@ type.defineHooks
 
 type.defineMethods
 
-  start: (animated, onEnd) ->
+  start: (animated, onUpdate) ->
     assertType animated, AnimatedValue.get()
-    assertType onEnd, Function
+    assertType onUpdate, Function.Maybe
 
     return this unless @isPending
     @_state += 1
 
-    @_previousAnimation = animated._animation
-    @_previousAnimation?.stop()
-
     if @_isInteraction
       id = @_createInteraction()
 
+    animation = animated._animation
+    animation?.stop()
+    @_previousAnimation = animation
+
+    if onUpdate
+      onUpdate = animated
+        .didSet onUpdate
+        .start()
+
+    unless @_useNativeDriver
+      @_onUpdate = (newValue) ->
+        animated._updateValue newValue, no
+
     @_onEnd = (finished) =>
       @_onEnd = emptyFunction
-      @_clearInteraction id
+      @_onUpdate = emptyFunction
 
+      animated._animation = null
+      onUpdate?.detach()
       if @_useNativeDriver
         NativeAnimated.removeUpdateListener animated
 
+      @_clearInteraction id
       @__onAnimationEnd finished
-      onEnd finished
-      @_deferred.resolve finished
+      @_flushEndQueue finished
+      return
 
+    animated._animation = this
     @_startAnimation animated
     return this
 
   stop: (finished = no) ->
+    isDev and assertType finished, Boolean
     @_stopAnimation finished
 
   then: (onEnd) ->
-    @_deferred.promise.then onEnd
+    isDev and assertType onEnd, Function
+    if queue = @_onEndQueue
+      queue.push onEnd
+    return this
 
   _requestAnimationFrame: (callback) ->
     @_animationFrame or @_animationFrame = injected.call "requestAnimationFrame", callback or @_recomputeValue
@@ -156,7 +173,7 @@ type.defineMethods
   _startAnimation: (animated) ->
     @startTime = Date.now()
     if @fromValue?
-    then animated._updateValue @fromValue
+    then animated._updateValue @fromValue, @_useNativeDriver
     else @fromValue = animated._value
     @__onAnimationStart animated
 
@@ -179,6 +196,13 @@ type.defineMethods
     then NativeAnimated.stopAnimation @_nativeTag
     else @_cancelAnimationFrame()
     @_onEnd finished
+    return
+
+  _flushEndQueue: (finished) ->
+    queue = @_onEndQueue
+    @_onEndQueue = null
+    for onEnd in queue
+      onEnd finished
     return
 
   _captureFrame: ->

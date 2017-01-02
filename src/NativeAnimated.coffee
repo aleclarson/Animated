@@ -13,21 +13,22 @@ if exports.isAvailable = NativeAnimatedModule?
 
   updatedValues = Object.create null
   nativeEvents.addListener "onAnimatedValueUpdate", (data) ->
-    return unless animatedValue = updatedValues[data.tag]
-    return unless animation = animatedValue._animation
+    return unless animated = updatedValues[data.tag]
+    return unless animation = animated._animation
     if animation._nativeTag is data.animation
-      animatedValue._updateValue data.value, yes
+      animated._updateValue data.value, yes
+    return
 
   delete exports.startListeningToAnimatedNodeValue
-  exports.addUpdateListener = (animatedValue) ->
-    tag = animatedValue.__getNativeTag()
+  exports.addUpdateListener = (animated) ->
+    tag = animated.__getNativeTag()
     NativeAnimatedModule.startListeningToAnimatedNodeValue tag
-    updatedValues[tag] = animatedValue
+    updatedValues[tag] = animated
     return
 
   delete exports.stopListeningToAnimatedNodeValue
-  exports.removeUpdateListener = (animatedValue) ->
-    tag = animatedValue.__nativeTag
+  exports.removeUpdateListener = (animated) ->
+    tag = animated.__nativeTag
     NativeAnimatedModule.stopListeningToAnimatedNodeValue tag
     delete updatedValues[tag]
     return
