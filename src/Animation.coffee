@@ -25,7 +25,6 @@ type.defineOptions
   isInteraction: Boolean.withDefault yes
   useNativeDriver: Boolean.withDefault no
   captureFrames: Boolean.withDefault no
-  onUpdate: Function.withDefault emptyFunction
 
 type.initArgs do ->
   hasWarned = no
@@ -56,7 +55,7 @@ type.defineValues (options) ->
 
   _previousAnimation: null
 
-  _onUpdate: options.onUpdate
+  _onUpdate: emptyFunction
 
   _onEnd: null
 
