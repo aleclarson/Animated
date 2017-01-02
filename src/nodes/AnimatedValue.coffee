@@ -35,16 +35,6 @@ type.defineReactiveValues
 
   _animation: null
 
-type.defineBoundMethods
-
-  _updateValue: (value, isNative) ->
-    oldValue = @_value
-    return if value is oldValue
-    @_value = value
-    @__updateChildren value unless isNative
-    @_dep.changed()
-    @didSet.emit value, oldValue
-
 type.definePrototype
 
   value:
@@ -82,11 +72,11 @@ type.defineMethods
     @_dep.depend() if Tracker.isActive
     return @_value
 
-  set: (value) ->
+  set: (newValue) ->
     @stopAnimation()
-    @_updateValue value, @__isNative
-    if @__isNative and @_children.length
-      NativeAnimated.setAnimatedNodeValue @__getNativeTag(), value
+    if @_updateValue newValue, @__isNative
+      if @__isNative and @_children.length
+        NativeAnimated.setAnimatedNodeValue @__getNativeTag(), newValue
     return
 
   animate: (config) ->
@@ -138,5 +128,17 @@ type.defineMethods
       path._update index - 1, progress
       return
     return path
+
+  _updateValue: (newValue, isNative) ->
+
+    return no if newValue is oldValue = @_value
+    @_value = newValue
+
+    unless isNative
+      @__updateChildren newValue
+
+    @_dep.changed()
+    @didSet.emit newValue, oldValue
+    return yes
 
 module.exports = type.build()

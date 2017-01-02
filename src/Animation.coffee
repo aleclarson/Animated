@@ -175,7 +175,7 @@ type.defineMethods
   _startAnimation: (animated) ->
     @startTime = Date.now()
     if @fromValue?
-    then animated._updateValue @fromValue
+    then animated._updateValue @fromValue, @_useNativeDriver
     else @fromValue = animated._value
     @__onAnimationStart animated
 
