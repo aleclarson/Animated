@@ -4,7 +4,6 @@
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
 LazyVar = require "LazyVar"
-Promise = require "Promise"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
@@ -41,8 +40,6 @@ type.defineValues (options) ->
 
   fromValue: options.fromValue ? null
 
-  _deferred: Promise.defer()
-
   _state: 0
 
   _isInteraction: options.isInteraction
@@ -57,7 +54,9 @@ type.defineValues (options) ->
 
   _onUpdate: emptyFunction
 
-  _onEnd: null
+  _onEnd: emptyFunction
+
+  _onEndQueue: []
 
   _frames: [] if options.captureFrames
 
@@ -132,7 +131,7 @@ type.defineMethods
 
       @__onAnimationEnd finished
       onEnd finished
-      @_deferred.resolve finished
+      @_flushEndQueue finished
 
     @_startAnimation animated
     return this
@@ -141,7 +140,10 @@ type.defineMethods
     @_stopAnimation finished
 
   then: (onEnd) ->
-    @_deferred.promise.then onEnd
+    isDev and assertType onEnd, Function
+    if queue = @_onEndQueue
+      queue.push onEnd
+    return this
 
   _requestAnimationFrame: (callback) ->
     @_animationFrame or @_animationFrame = injected.call "requestAnimationFrame", callback or @_recomputeValue
@@ -178,6 +180,13 @@ type.defineMethods
     then NativeAnimated.stopAnimation @_nativeTag
     else @_cancelAnimationFrame()
     @_onEnd finished
+    return
+
+  _flushEndQueue: (finished) ->
+    queue = @_onEndQueue
+    @_onEndQueue = null
+    for onEnd in queue
+      onEnd finished
     return
 
   _captureFrame: ->
