@@ -19,6 +19,14 @@ type.definePrototype
 
 type.overrideMethods
 
+  # All previous `Animated` nodes must be detached.
+  __detachAnimatedValues: ->
+    @__detachAllValues()
+
+  # If one value is native, all values are considered native.
+  __getNonNativeValues: ->
+    throw Error "AnimatedTransform cannot be partially native!"
+
   __getAllValues: ->
 
     transforms = []
@@ -36,10 +44,6 @@ type.overrideMethods
 
     return transforms
 
-  # If an `AnimatedTransform` node has a native value, all values are considered native.
-  __getNonNativeValues: ->
-    throw Error "AnimatedTransform::__getNonNativeValues is not supported"
-
   __attachNewValues: (transforms) ->
     assertType transforms, Array
     for transform, index in transforms
@@ -54,11 +58,6 @@ type.overrideMethods
       then @__attachAnimatedValue value, key
       else @__values[key] = value
     return
-
-  # When an `AnimatedTransform` updates its value,
-  # all previous `Animated` nodes are detached.
-  __detachAnimatedValues: ->
-    @__detachAllValues()
 
   __getNativeConfig: ->
     transforms = []

@@ -117,9 +117,6 @@ type.defineMethods
     return this unless @isPending
     @_state += 1
 
-    @_previousAnimation = animated._animation
-    @_previousAnimation?.stop()
-
     if @_isInteraction
       id = @_createInteraction()
 
@@ -155,6 +152,7 @@ type.defineMethods
     return this
 
   stop: (finished = no) ->
+    isDev and assertType finished, Boolean
     @_stopAnimation finished
 
   then: (onEnd) ->
