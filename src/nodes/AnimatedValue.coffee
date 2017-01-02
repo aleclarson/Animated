@@ -10,7 +10,6 @@ Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
 NativeAnimated = require "../NativeAnimated"
-AnimationPath = require "../AnimationPath"
 Animation = require "../Animation"
 
 injected = require "../injectable"
@@ -109,25 +108,6 @@ type.defineMethods
       @_animation.stop()
       @_animation = null
     return
-
-  createPath: (values) ->
-    assertType values, Array
-    path = AnimationPath()
-    path.listener = @didSet (newValue) ->
-      index = -1
-      maxIndex = values.length - 1
-      while newValue >= values[++index]
-        break if index is maxIndex
-      fromValue = values[index - 1]
-      if fromValue is undefined
-        index += 1
-        progress = 0
-      else
-        progress = (newValue - fromValue) / (values[index] - fromValue)
-        progress = clampValue progress, 0, 1
-      path._update index - 1, progress
-      return
-    return path
 
   _updateValue: (newValue, isNative) ->
 
