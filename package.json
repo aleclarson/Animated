@@ -12,7 +12,6 @@
   "dependencies": {
     "Event": "aleclarson/Event#3.1.2",
     "InjectableMap": "aleclarson/InjectableMap#1.1.0",
-    "LazyMap": "aleclarson/LazyMap#1.0.1",
     "LazyVar": "aleclarson/LazyVar#2.1.1",
     "Nan": "aleclarson/Nan#1.1.1",
     "OneOf": "aleclarson/OneOf#1.0.1",
