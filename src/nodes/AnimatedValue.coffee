@@ -50,6 +50,16 @@ type.defineGetters
 
   animation: -> @_animation
 
+type.definePrototype
+
+  type:
+    get: -> @_type
+    set: (type) ->
+      unless type
+        assertType @_value, type
+        frozen.define this, "_type", type
+      return
+
 type.overrideMethods
 
   __detach: ->
@@ -73,6 +83,7 @@ type.defineMethods
 
   set: (newValue) ->
     @stopAnimation()
+    assertType newValue, @_type if @_type
     if @_updateValue newValue, @__isNative
       if @__isNative and @_children.length
         NativeAnimated.setAnimatedNodeValue @__getNativeTag(), newValue
