@@ -14,8 +14,9 @@ type = Type "AnimatedProps"
 
 type.inherits AnimatedMap
 
-type.defineArgs
-  propTypes: Object
+type.defineArgs ->
+  required: no
+  types: [Object]
 
 type.defineValues (propTypes) ->
 
