@@ -1,7 +1,7 @@
 
 assertType = require "assertType"
 isType = require "isType"
-Event = require "Event"
+Event = require "eve"
 Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"

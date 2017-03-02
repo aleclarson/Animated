@@ -20,20 +20,28 @@ type.trace()
 type.defineStatics
   types: Object.create null
 
-type.defineOptions
-  fromValue: Number
-  isInteraction: Boolean.withDefault yes
-  useNativeDriver: Boolean.withDefault no
-  captureFrames: Boolean.withDefault no
+type.defineArgs ->
 
-type.initArgs do ->
+  types:
+    fromValue: Number
+    isInteraction: Boolean
+    useNativeDriver: Boolean
+    captureFrames: Boolean
+
+  defaults:
+    isInteraction: yes
+    useNativeDriver: no
+    captureFrames: no
+
+type.initInstance do ->
   hasWarned = no
-  return (args) ->
-    return unless args[0].useNativeDriver
-    return if NativeAnimated.isAvailable or hasWarned
-    args[0].useNativeDriver = no
-    log.warn "Failed to load NativeAnimatedModule! Falling back to JS-driven animations."
-    hasWarned = yes
+  return (options) ->
+    if options.useNativeDriver
+      return if NativeAnimated.isAvailable or hasWarned
+      options.useNativeDriver = no
+      log.warn "Failed to load NativeAnimatedModule! Falling back to JS-driven animations."
+      hasWarned = yes
+    return
 
 type.defineValues (options) ->
 
