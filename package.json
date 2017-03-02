@@ -10,7 +10,6 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "Event": "aleclarson/Event#3.2.1",
     "InjectableMap": "aleclarson/InjectableMap#1.1.0",
     "LazyVar": "aleclarson/LazyVar#2.2.0",
     "Nan": "aleclarson/Nan#1.1.1",
@@ -20,6 +19,7 @@
     "assertType": "aleclarson/assertType#2.0.1",
     "clampValue": "aleclarson/clampValue#1.0.0",
     "emptyFunction": "aleclarson/emptyFunction#1.0.0",
+    "eve": "aleclarson/eve#1.0.1",
     "isDev": "aleclarson/isDev#2.0.0",
     "isType": "aleclarson/isType#1.0.1",
     "react-validators": "aleclarson/react-validators#1.0.1",
