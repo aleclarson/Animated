@@ -19,22 +19,38 @@ type.defineArgs ->
   required: no
   types: [Object]
 
+type.defineMethods
+
+  setAnimatedView: (animatedView) ->
+
+    if @__isNative and @_animatedView
+      @_disconnectAnimatedView()
+
+    @_animatedView = animatedView
+
+    if @__isNative and animatedView
+      @_connectAnimatedView()
+    return
+
+  detach: ->
+
+    if @__isNative and @_animatedView
+      @_disconnectAnimatedView()
+
+    @__detach()
+    return
+
+#
+# Internals
+#
+
 type.defineValues (propTypes) ->
 
   _propTypes: propTypes or {}
 
   _animatedView: null
 
-#
-# Prototype
-#
-
 type.overrideMethods
-
-  __detach: ->
-    if @__isNative and @_animatedView
-      @_disconnectAnimatedView()
-    return @__super arguments
 
   __addChild: emptyFunction
 
@@ -84,17 +100,6 @@ type.overrideMethods
     return {type: "props", props}
 
 type.defineMethods
-
-  setAnimatedView: (animatedView) ->
-
-    if @__isNative and @_animatedView
-      @_disconnectAnimatedView()
-
-    @_animatedView = animatedView
-
-    if @__isNative and animatedView
-      @_connectAnimatedView()
-    return
 
   _connectAnimatedView: ->
 
