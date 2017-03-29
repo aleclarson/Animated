@@ -60,6 +60,9 @@ type.overrideMethods
 
   __markNative: ->
 
+    # Native animations not supported.
+    return unless NativeAnimated.isAvailable
+
     return if @__isNative
     @__isNative = yes
 
