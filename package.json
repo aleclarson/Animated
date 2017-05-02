@@ -14,6 +14,7 @@
     "LazyVar": "aleclarson/LazyVar#2.2.0",
     "Nan": "aleclarson/Nan#1.1.1",
     "OneOf": "aleclarson/OneOf#1.0.1",
+    "Property": "aleclarson/Property#1.2.4",
     "Shape": "aleclarson/Shape#2.0.1",
     "Type": "aleclarson/Type#2.3.1",
     "assertType": "aleclarson/assertType#2.0.1",

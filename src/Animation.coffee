@@ -1,4 +1,5 @@
 
+{mutable} = require "Property"
 {Number} = require "Nan"
 
 emptyFunction = require "emptyFunction"
@@ -51,6 +52,8 @@ type.defineValues (options) ->
 
   _nativeTag: null
 
+  _lastTime: null
+
   _animationFrame: null
 
   _previousAnimation: null
@@ -63,13 +66,25 @@ type.defineValues (options) ->
 
 type.defineBoundMethods
 
-  _recomputeValue: ->
+  _recomputeValue: (time) ->
 
     @_animationFrame = null
     return if @isDone
 
-    value = @__computeValue()
+    # Support browsers that don't pass a timestamp.
+    if typeof time isnt "number"
+      time = Date.now()
+      @elapsedTime = time - @startTime
+
+    else if @_lastTime
+      @elapsedTime += time - @_lastTime
+
+    else
+      @elapsedTime = Date.now() - @startTime
+
+    value = @__computeValue time
     @__onAnimationUpdate value
+    @_lastTime = time
 
     @_onUpdate value
     @isDone or @_requestAnimationFrame()
@@ -165,10 +180,15 @@ type.defineMethods
     return
 
   _startAnimation: (animated) ->
-    @startTime = Date.now()
+
     if @fromValue?
     then animated._updateValue @fromValue, @_useNativeDriver
     else @fromValue = animated._value
+
+    @startTime = Date.now()
+    unless @_useNativeDriver
+      mutable.define this, "elapsedTime", {value: 0}
+
     @__onAnimationStart animated
 
   _startNativeAnimation: (animated) ->
