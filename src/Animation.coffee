@@ -3,15 +3,11 @@
 
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
-LazyVar = require "LazyVar"
 isDev = require "isDev"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
 injected = require "./injectable"
-
-# Avoid circular dependency.
-AnimatedValue = LazyVar -> require "./nodes/AnimatedValue"
 
 type = Type "Animation"
 
@@ -110,7 +106,6 @@ type.defineHooks
 type.defineMethods
 
   start: (animated, onUpdate) ->
-    assertType animated, AnimatedValue.get()
     assertType onUpdate, Function.Maybe
 
     return this unless @isPending
