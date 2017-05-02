@@ -136,9 +136,7 @@ type.defineMethods
     @_previousAnimation = animation
 
     if onUpdate
-      onUpdate = animated
-        .didSet onUpdate
-        .start()
+      onUpdate = animated.didSet onUpdate
 
     unless @_useNativeDriver
       @_onUpdate = (newValue) ->
