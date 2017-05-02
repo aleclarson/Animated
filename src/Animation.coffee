@@ -26,12 +26,10 @@ type.defineArgs ->
     fromValue: Number
     isInteraction: Boolean
     useNativeDriver: Boolean
-    captureFrames: Boolean
 
   defaults:
     isInteraction: yes
     useNativeDriver: no
-    captureFrames: no
 
 type.initInstance do ->
   hasWarned = no
@@ -67,10 +65,6 @@ type.defineValues (options) ->
 
   _onEndQueue: []
 
-  _frames: [] if options.captureFrames
-
-  _captureFrame: emptyFunction unless options.captureFrames
-
 type.defineBoundMethods
 
   _recomputeValue: ->
@@ -80,7 +74,6 @@ type.defineBoundMethods
 
     value = @__computeValue()
     @__onAnimationUpdate value
-    @_captureFrame()
 
     @_onUpdate value
     @isDone or @_requestAnimationFrame()
@@ -110,8 +103,6 @@ type.defineHooks
   __onAnimationUpdate: emptyFunction
 
   __onAnimationEnd: emptyFunction
-
-  __captureFrame: emptyFunction
 
   __getNativeConfig: ->
     throw Error "This animation type does not support native offloading!"
@@ -211,12 +202,6 @@ type.defineMethods
     @_onEndQueue = null
     for onEnd in queue
       onEnd finished
-    return
-
-  _captureFrame: ->
-    frame = @__captureFrame()
-    assertType frame, Object
-    @_frames.push frame
     return
 
   _assertNumber: (value) ->
