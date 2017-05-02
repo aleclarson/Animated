@@ -1,7 +1,8 @@
 
 {Children, Style} = require "react-validators"
 
-findNodeHandle = require "findNodeHandle"
+findNodeHandle = require "react/lib/findNodeHandle"
+
 emptyFunction = require "emptyFunction"
 isDev = require "isDev"
 Type = require "Type"
@@ -18,67 +19,6 @@ type.defineArgs ->
   required: no
   types: [Object]
 
-type.defineValues (propTypes) ->
-
-  _propTypes: propTypes or {}
-
-  _animatedView: null
-
-#
-# Prototype
-#
-
-type.overrideMethods
-
-  __detach: ->
-    if @__isNative and @_animatedView
-      @_disconnectAnimatedView()
-    return @__super arguments
-
-  __addChild: emptyFunction
-
-  __updateChildren: (value) ->
-    @didSet.emit value
-
-  __removeChild: emptyFunction
-
-  __attachValue: (value, key) ->
-
-    type = @_propTypes[key] if @_propTypes
-
-    if type is Children
-      @__values[key] = value
-      return
-
-    if type is Style and value?
-      style = @__animatedValues[key] or AnimatedStyle()
-      style.attach value
-      @__attachAnimatedValue style, key
-      return
-
-    @__super arguments
-    return
-
-  __markNative: ->
-
-    return if @__isNative
-    @__isNative = yes
-
-    if @_animatedView
-      @_connectAnimatedView()
-    return
-
-  __getNativeConfig: ->
-
-    props = {}
-    animatedValues = @__animatedValues
-    for key, value of animatedValues
-      continue unless value.__isNative
-      props[key] = value.__getNativeTag()
-
-    isDev and NativeAnimated.validateProps props
-    return {type: "props", props}
-
 type.defineMethods
 
   setAnimatedView: (animatedView) ->
@@ -91,6 +31,88 @@ type.defineMethods
     if @__isNative and animatedView
       @_connectAnimatedView()
     return
+
+  detach: ->
+
+    if @__isNative and @_animatedView
+      @_disconnectAnimatedView()
+
+    @__detach()
+    return
+
+#
+# Internals
+#
+
+type.defineValues (propTypes, onUpdate) ->
+
+  _propTypes: propTypes or {}
+
+  _animatedView: null
+
+  _isUpdating: no
+
+  _onUpdate: onUpdate
+
+type.overrideMethods
+
+  __addChild: emptyFunction
+
+  __removeChild: emptyFunction
+
+  __attachValue: (value, key) ->
+
+    type = @_propTypes[key] if @_propTypes
+
+    if type is Children
+      @_values[key] = value
+      return
+
+    if type is Style and value?
+      style = @_animatedValues[key] or AnimatedStyle()
+      style.attach value
+      @__attachAnimatedValue style, key
+      return
+
+    @__super arguments
+    return
+
+  __markNative: ->
+
+    # Native animations not supported.
+    return unless NativeAnimated.isAvailable
+
+    return if @__isNative
+    @__isNative = yes
+
+    if @_animatedView
+      @_connectAnimatedView()
+    return
+
+  __getNativeConfig: ->
+
+    props = {}
+    animatedValues = @_animatedValues
+    for key, value of animatedValues
+      continue unless value.__isNative
+      props[key] = value.__getNativeTag()
+
+    isDev and NativeAnimated.validateProps props
+    return {type: "props", props}
+
+  __didUpdateValue: (key, value) ->
+
+    @_updatedValues[key] = value
+    return if @_isUpdating
+
+    @_isUpdating = yes
+    requestAnimationFrame =>
+      props = @__getUpdatedValue()
+      @_isUpdating = no
+      @_onUpdate props
+      return
+
+type.defineMethods
 
   _connectAnimatedView: ->
 

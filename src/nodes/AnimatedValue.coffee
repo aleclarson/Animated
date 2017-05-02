@@ -34,12 +34,6 @@ type.defineReactiveValues
 
   _animation: null
 
-type.definePrototype
-
-  value:
-    get: -> throw Error "DEPRECATED: Use the 'get' method!"
-    set: -> throw Error "DEPRECATED: Use the 'set' method!"
-
 #
 # Prototype
 #
@@ -69,8 +63,8 @@ type.overrideMethods
   __getValue: ->
     return @_value
 
-  __updateChildren: ->
-    @__super [@__getValue()]
+  __getUpdatedValue: ->
+    return @_value
 
   __getNativeConfig: ->
     {type: "value", value: @_value}
@@ -121,12 +115,10 @@ type.defineMethods
     return
 
   _updateValue: (newValue, isNative) ->
-
     return no if newValue is oldValue = @_value
-    @_value = newValue
 
-    unless isNative
-      @__updateChildren newValue
+    @_value = newValue
+    isNative or @_didUpdate()
 
     @_dep.changed()
     @didSet.emit newValue, oldValue

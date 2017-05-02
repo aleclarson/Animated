@@ -19,7 +19,7 @@ type.overrideMethods
   __attachValue: (value, key) ->
 
     if key is "transform" and Array.isArray value
-      transform = @__animatedValues[key] or AnimatedTransform()
+      transform = @_animatedValues[key] or AnimatedTransform()
       transform.attach value
       @__attachAnimatedValue transform, key
       return
@@ -38,7 +38,7 @@ type.overrideMethods
   __getNativeConfig: ->
 
     style = {}
-    animatedValues = @__animatedValues
+    animatedValues = @_animatedValues
     for key, value of animatedValues
       continue unless value.__isNative
       style[key] = value.__getNativeTag()

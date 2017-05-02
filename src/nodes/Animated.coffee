@@ -24,13 +24,13 @@ type.defineHooks
 
   __getValue: null
 
+  __getUpdatedValue: null
+
   __addChild: emptyFunction
 
   __removeChild: emptyFunction
 
   __getChildren: emptyFunction.thatReturns []
-
-  __updateChildren: emptyFunction
 
   __markNative: ->
     unless @__isNative

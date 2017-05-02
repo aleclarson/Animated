@@ -1,17 +1,13 @@
 
+{mutable} = require "Property"
 {Number} = require "Nan"
 
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
-LazyVar = require "LazyVar"
-isDev = require "isDev"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
 injected = require "./injectable"
-
-# Avoid circular dependency.
-AnimatedValue = LazyVar -> require "./nodes/AnimatedValue"
 
 type = Type "Animation"
 
@@ -26,12 +22,10 @@ type.defineArgs ->
     fromValue: Number
     isInteraction: Boolean
     useNativeDriver: Boolean
-    captureFrames: Boolean
 
   defaults:
     isInteraction: yes
     useNativeDriver: no
-    captureFrames: no
 
 type.initInstance do ->
   hasWarned = no
@@ -57,6 +51,8 @@ type.defineValues (options) ->
 
   _nativeTag: null
 
+  _lastTime: null
+
   _animationFrame: null
 
   _previousAnimation: null
@@ -67,24 +63,34 @@ type.defineValues (options) ->
 
   _onEndQueue: []
 
-  _frames: [] if options.captureFrames
-
-  _captureFrame: emptyFunction unless options.captureFrames
-
 type.defineBoundMethods
 
-  _recomputeValue: ->
+  _recomputeValue: (time) ->
 
     @_animationFrame = null
     return if @isDone
 
-    value = @__computeValue()
-    @__onAnimationUpdate value
-    @_captureFrame()
+    # Support browsers that don't pass a timestamp.
+    if typeof time isnt "number"
+      time = Date.now()
+      @elapsedTime = time - @startTime
 
-    @_onUpdate value
-    @isDone or @_requestAnimationFrame()
-    return
+    else if @_lastTime
+      @elapsedTime += time - @_lastTime
+
+    else
+      @elapsedTime = Date.now() - @startTime
+
+    value = @__computeValue time
+    value = Math.round(value * 1e3) / 1e3
+
+    @__onAnimationUpdate value
+    @_lastTime = time
+
+    unless @isDone
+      @_onUpdate value
+      @_requestAnimationFrame()
+      return
 
 #
 # Prototype
@@ -111,15 +117,12 @@ type.defineHooks
 
   __onAnimationEnd: emptyFunction
 
-  __captureFrame: emptyFunction
-
   __getNativeConfig: ->
     throw Error "This animation type does not support native offloading!"
 
 type.defineMethods
 
   start: (animated, onUpdate) ->
-    assertType animated, AnimatedValue.get()
     assertType onUpdate, Function.Maybe
 
     return this unless @isPending
@@ -128,14 +131,12 @@ type.defineMethods
     if @_isInteraction
       id = @_createInteraction()
 
-    animation = animated._animation
-    animation?.stop()
-    @_previousAnimation = animation
+    if animation = animated._animation
+      @_previousAnimation = animation
+      animation.stop()
 
     if onUpdate
-      onUpdate = animated
-        .didSet onUpdate
-        .start()
+      onUpdate = animated.didSet onUpdate
 
     unless @_useNativeDriver
       @_onUpdate = (newValue) ->
@@ -143,15 +144,17 @@ type.defineMethods
 
     @_onEnd = (finished) =>
       @_onEnd = emptyFunction
-      @_onUpdate = emptyFunction
 
+      @_clearInteraction id
+      @__onAnimationEnd finished
       animated._animation = null
+
+      # Prevent further updates.
+      @_onUpdate = emptyFunction
       onUpdate?.detach()
       if @_useNativeDriver
         NativeAnimated.removeUpdateListener animated
 
-      @_clearInteraction id
-      @__onAnimationEnd finished
       @_flushEndQueue finished
       return
 
@@ -160,11 +163,11 @@ type.defineMethods
     return this
 
   stop: (finished = no) ->
-    isDev and assertType finished, Boolean
+    assertType finished, Boolean
     @_stopAnimation finished
 
   then: (onEnd) ->
-    isDev and assertType onEnd, Function
+    assertType onEnd, Function
     if queue = @_onEndQueue
       queue.push onEnd
     return this
@@ -176,14 +179,20 @@ type.defineMethods
     if @_animationFrame
       injected.call "cancelAnimationFrame", @_animationFrame
       @_animationFrame = null
-    return
+      return
 
   _startAnimation: (animated) ->
-    @startTime = Date.now()
+
     if @fromValue?
     then animated._updateValue @fromValue, @_useNativeDriver
     else @fromValue = animated._value
+
+    @startTime = Date.now()
+    unless @_useNativeDriver
+      mutable.define this, "elapsedTime", {value: 0}
+
     @__onAnimationStart animated
+    return
 
   _startNativeAnimation: (animated) ->
     @_nativeTag = NativeAnimated.createAnimationTag()
@@ -192,19 +201,21 @@ type.defineMethods
     animationConfig = @__getNativeConfig()
     NativeAnimated.addUpdateListener animated
     NativeAnimated.startAnimatingNode @_nativeTag, animatedTag, animationConfig, (data) =>
-      return if @isDone
-      @_state += 1
-      @_onEnd data.finished
-      return
+      unless @isDone
+        @_state += 1
+        @_onEnd data.finished
+        return
 
   _stopAnimation: (finished) ->
-    return if @isDone
-    @_state += 1
-    if @_nativeTag
-    then NativeAnimated.stopAnimation @_nativeTag
-    else @_cancelAnimationFrame()
-    @_onEnd finished
-    return
+    unless @isDone
+      @_state += 1
+
+      if @_nativeTag
+      then NativeAnimated.stopAnimation @_nativeTag
+      else @_cancelAnimationFrame()
+
+      @_onEnd finished
+      return
 
   _flushEndQueue: (finished) ->
     queue = @_onEndQueue
@@ -213,19 +224,16 @@ type.defineMethods
       onEnd finished
     return
 
-  _captureFrame: ->
-    frame = @__captureFrame()
-    assertType frame, Object
-    @_frames.push frame
-    return
-
   _assertNumber: (value) ->
     assertType value, Number
+    return
 
   _createInteraction: ->
-    injected.get("InteractionManager").createInteractionHandle()
+    return injected.get("InteractionManager").createInteractionHandle()
 
   _clearInteraction: (handle) ->
-    handle? and injected.get("InteractionManager").clearInteractionHandle handle
+    if handle?
+      injected.get("InteractionManager").clearInteractionHandle handle
+      return
 
 module.exports = Animation = type.build()

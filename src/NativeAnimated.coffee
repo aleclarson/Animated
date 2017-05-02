@@ -1,9 +1,11 @@
 
-{NativeAnimatedModule} = require "NativeModules"
-
 NativeEventEmitter = require "NativeEventEmitter"
 assertType = require "assertType"
+Platform = require "Platform"
 isDev = require "isDev"
+
+if Platform.OS isnt "web"
+  {NativeAnimatedModule} = require "NativeModules"
 
 if exports.isAvailable = NativeAnimatedModule?
 
