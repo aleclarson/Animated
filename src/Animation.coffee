@@ -144,15 +144,17 @@ type.defineMethods
 
     @_onEnd = (finished) =>
       @_onEnd = emptyFunction
-      @_onUpdate = emptyFunction
 
+      @_clearInteraction id
+      @__onAnimationEnd finished
       animated._animation = null
+
+      # Prevent further updates.
+      @_onUpdate = emptyFunction
       onUpdate?.detach()
       if @_useNativeDriver
         NativeAnimated.removeUpdateListener animated
 
-      @_clearInteraction id
-      @__onAnimationEnd finished
       @_flushEndQueue finished
       return
 
