@@ -69,8 +69,8 @@ type.overrideMethods
   __getValue: ->
     return @_value
 
-  __updateChildren: ->
-    @__super [@__getValue()]
+  __getUpdatedValue: ->
+    return @_value
 
   __getNativeConfig: ->
     {type: "value", value: @_value}
@@ -123,10 +123,9 @@ type.defineMethods
   _updateValue: (newValue, isNative) ->
 
     return no if newValue is oldValue = @_value
-    @_value = newValue
 
-    unless isNative
-      @__updateChildren newValue
+    @_value = newValue
+    isNative or @_didUpdate()
 
     @_dep.changed()
     @didSet.emit newValue, oldValue

@@ -13,6 +13,10 @@ type = Type "AnimatedTransform"
 
 type.inherits AnimatedMap
 
+type.defineValues
+
+  _updatedValues: null
+
 type.definePrototype
 
   __isAnimatedTransform: yes
@@ -26,6 +30,13 @@ type.overrideMethods
   # If one value is native, all values are considered native.
   __getNonNativeValues: ->
     throw Error "AnimatedTransform cannot be partially native!"
+
+  __didUpdateValue: ->
+    @_didUpdate()
+    return
+
+  __getUpdatedValue: ->
+    return @__getAllValues()
 
   __getAllValues: ->
 

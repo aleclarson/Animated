@@ -24,6 +24,8 @@ type.defineValues ->
 
   __animatedValues: {}
 
+  _updatedValues: {}
+
 type.definePrototype
 
   __isAnimatedMap: yes
@@ -42,11 +44,21 @@ type.overrideMethods
   __getValue: ->
     return @__getAllValues()
 
-  __updateChildren: (value) ->
-    @__super arguments
-    @didSet.emit value
+  __getUpdatedValue: ->
+
+    values = {}
+    for key, value of @_updatedValues
+      values[key] = value.__getUpdatedValue()
+
+    @_updatedValues = {}
+    return values
 
 type.defineHooks
+
+  __didUpdateValue: (key, value) ->
+    @_updatedValues[key] = value
+    @_didUpdate()
+    return
 
   # Returns an object of all values (including native values).
   # This should be used when creating a new `ReactElement`.

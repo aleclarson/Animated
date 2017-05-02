@@ -44,18 +44,19 @@ type.defineMethods
 # Internals
 #
 
-type.defineValues (propTypes) ->
+type.defineValues (propTypes, onUpdate) ->
 
   _propTypes: propTypes or {}
 
   _animatedView: null
 
+  _isUpdating: no
+
+  _onUpdate: onUpdate
+
 type.overrideMethods
 
   __addChild: emptyFunction
-
-  __updateChildren: (value) ->
-    @didSet.emit value
 
   __removeChild: emptyFunction
 
@@ -98,6 +99,18 @@ type.overrideMethods
 
     isDev and NativeAnimated.validateProps props
     return {type: "props", props}
+
+  __didUpdateValue: (key, value) ->
+
+    @_updatedValues[key] = value
+    return if @_isUpdating
+
+    @_isUpdating = yes
+    requestAnimationFrame =>
+      props = @__getUpdatedValue()
+      @_isUpdating = no
+      @_onUpdate props
+      return
 
 type.defineMethods
 

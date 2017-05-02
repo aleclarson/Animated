@@ -14,6 +14,15 @@ type.defineFrozenValues ->
 
   _childKeys: []
 
+type.defineMethods
+
+  _didUpdate: ->
+    keys = @_childKeys
+    children = @__getChildren()
+    for child, index in children
+      child.__didUpdateValue keys[index], this
+    return
+
 type.overrideMethods
 
   __getChildren: ->
@@ -29,18 +38,6 @@ type.overrideMethods
 
     if @_children.length is 0
       @__attach()
-    return
-
-  __updateChildren: (value) ->
-    children = @__getChildren()
-    for child, index in children
-      if child.__isAnimatedTransform
-        update = child.__getAllValues()
-      else
-        key = @_childKeys[index]
-        update = {}
-        update[key] = value
-      child.__updateChildren update
     return
 
   __removeChild: (child) ->
