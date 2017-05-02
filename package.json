@@ -1,0 +1,22 @@
+{
+  "name": "Animated",
+  "version": "3.7.0",
+  "main": "js/index",
+  "dependencies": {
+    "InjectableMap": "aleclarson/InjectableMap#1.1.1",
+    "Nan": "aleclarson/Nan#1.1.2",
+    "OneOf": "aleclarson/OneOf#1.1.0",
+    "Property": "aleclarson/Property#1.2.4",
+    "Shape": "aleclarson/Shape#2.0.2",
+    "Type": "aleclarson/Type#2.4.0",
+    "assertType": "aleclarson/assertType#2.0.2",
+    "clampValue": "aleclarson/clampValue#1.0.0",
+    "emptyFunction": "aleclarson/emptyFunction#1.0.0",
+    "eve": "aleclarson/eve#1.1.2",
+    "isDev": "aleclarson/isDev#2.0.0",
+    "isType": "aleclarson/isType#1.0.2",
+    "react-validators": "aleclarson/react-validators#1.0.2",
+    "steal": "aleclarson/steal#1.2.0",
+    "tracker": "aleclarson/tracker#2.2.1"
+  }
+}
