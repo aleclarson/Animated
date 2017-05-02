@@ -42,12 +42,12 @@ type.overrideMethods
 
     transforms = []
 
-    for key, value of @__values
+    for key, value of @_values
       [index, key] = key.split "."
       transforms[index] = transform = {}
       transform[key] = value
 
-    animatedValues = @__animatedValues
+    animatedValues = @_animatedValues
     for key, value of animatedValues
       [index, key] = key.split "."
       transforms[index] = transform = {}
@@ -67,19 +67,19 @@ type.overrideMethods
       key = index + "." + key
       if value instanceof Animated
       then @__attachAnimatedValue value, key
-      else @__values[key] = value
+      else @_values[key] = value
     return
 
   __getNativeConfig: ->
     transforms = []
 
     type = "static"
-    for key, value of @__values
+    for key, value of @_values
       [index, property] = key.split "."
       transforms[index] = {type, property, value}
 
     type = "animated"
-    animatedValues = @__animatedValues
+    animatedValues = @_animatedValues
     for key, value of animatedValues
       [index, property] = key.split "."
       nodeTag = value.__getNativeTag()

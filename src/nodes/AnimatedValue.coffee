@@ -34,12 +34,6 @@ type.defineReactiveValues
 
   _animation: null
 
-type.definePrototype
-
-  value:
-    get: -> throw Error "DEPRECATED: Use the 'get' method!"
-    set: -> throw Error "DEPRECATED: Use the 'set' method!"
-
 #
 # Prototype
 #
@@ -121,7 +115,6 @@ type.defineMethods
     return
 
   _updateValue: (newValue, isNative) ->
-
     return no if newValue is oldValue = @_value
 
     @_value = newValue

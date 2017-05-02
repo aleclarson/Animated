@@ -4,7 +4,6 @@
 
 emptyFunction = require "emptyFunction"
 assertType = require "assertType"
-isDev = require "isDev"
 Type = require "Type"
 
 NativeAnimated = require "./NativeAnimated"
@@ -88,9 +87,10 @@ type.defineBoundMethods
     @__onAnimationUpdate value
     @_lastTime = time
 
-    @_onUpdate value
-    @isDone or @_requestAnimationFrame()
-    return
+    unless @isDone
+      @_onUpdate value
+      @_requestAnimationFrame()
+      return
 
 #
 # Prototype
@@ -131,9 +131,9 @@ type.defineMethods
     if @_isInteraction
       id = @_createInteraction()
 
-    animation = animated._animation
-    animation?.stop()
-    @_previousAnimation = animation
+    if animation = animated._animation
+      @_previousAnimation = animation
+      animation.stop()
 
     if onUpdate
       onUpdate = animated.didSet onUpdate
@@ -163,11 +163,11 @@ type.defineMethods
     return this
 
   stop: (finished = no) ->
-    isDev and assertType finished, Boolean
+    assertType finished, Boolean
     @_stopAnimation finished
 
   then: (onEnd) ->
-    isDev and assertType onEnd, Function
+    assertType onEnd, Function
     if queue = @_onEndQueue
       queue.push onEnd
     return this
@@ -179,7 +179,7 @@ type.defineMethods
     if @_animationFrame
       injected.call "cancelAnimationFrame", @_animationFrame
       @_animationFrame = null
-    return
+      return
 
   _startAnimation: (animated) ->
 
@@ -192,6 +192,7 @@ type.defineMethods
       mutable.define this, "elapsedTime", {value: 0}
 
     @__onAnimationStart animated
+    return
 
   _startNativeAnimation: (animated) ->
     @_nativeTag = NativeAnimated.createAnimationTag()
@@ -200,19 +201,21 @@ type.defineMethods
     animationConfig = @__getNativeConfig()
     NativeAnimated.addUpdateListener animated
     NativeAnimated.startAnimatingNode @_nativeTag, animatedTag, animationConfig, (data) =>
-      return if @isDone
-      @_state += 1
-      @_onEnd data.finished
-      return
+      unless @isDone
+        @_state += 1
+        @_onEnd data.finished
+        return
 
   _stopAnimation: (finished) ->
-    return if @isDone
-    @_state += 1
-    if @_nativeTag
-    then NativeAnimated.stopAnimation @_nativeTag
-    else @_cancelAnimationFrame()
-    @_onEnd finished
-    return
+    unless @isDone
+      @_state += 1
+
+      if @_nativeTag
+      then NativeAnimated.stopAnimation @_nativeTag
+      else @_cancelAnimationFrame()
+
+      @_onEnd finished
+      return
 
   _flushEndQueue: (finished) ->
     queue = @_onEndQueue
@@ -223,11 +226,14 @@ type.defineMethods
 
   _assertNumber: (value) ->
     assertType value, Number
+    return
 
   _createInteraction: ->
-    injected.get("InteractionManager").createInteractionHandle()
+    return injected.get("InteractionManager").createInteractionHandle()
 
   _clearInteraction: (handle) ->
-    handle? and injected.get("InteractionManager").clearInteractionHandle handle
+    if handle?
+      injected.get("InteractionManager").clearInteractionHandle handle
+      return
 
 module.exports = Animation = type.build()

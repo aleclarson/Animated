@@ -65,11 +65,11 @@ type.overrideMethods
     type = @_propTypes[key] if @_propTypes
 
     if type is Children
-      @__values[key] = value
+      @_values[key] = value
       return
 
     if type is Style and value?
-      style = @__animatedValues[key] or AnimatedStyle()
+      style = @_animatedValues[key] or AnimatedStyle()
       style.attach value
       @__attachAnimatedValue style, key
       return
@@ -92,7 +92,7 @@ type.overrideMethods
   __getNativeConfig: ->
 
     props = {}
-    animatedValues = @__animatedValues
+    animatedValues = @_animatedValues
     for key, value of animatedValues
       continue unless value.__isNative
       props[key] = value.__getNativeTag()

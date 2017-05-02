@@ -15,9 +15,9 @@ type.inherits AnimatedWithChildren
 
 type.defineValues ->
 
-  __values: {}
+  _values: {}
 
-  __animatedValues: {}
+  _animatedValues: {}
 
   _updatedValues: {}
 
@@ -59,9 +59,9 @@ type.defineHooks
   # This should be used when creating a new `ReactElement`.
   __getAllValues: ->
     values = {}
-    for key, value of @__values
+    for key, value of @_values
       values[key] =
-        if animatedValue = @__animatedValues[key]
+        if animatedValue = @_animatedValues[key]
         then animatedValue.__getValue()
         else value
     return values
@@ -79,8 +79,8 @@ type.defineHooks
 
     return ->
       values = {}
-      for key, value of @__values
-        if animatedValue = @__animatedValues[key]
+      for key, value of @_values
+        if animatedValue = @_animatedValues[key]
           unless isNative animatedValue
             values[key] = animatedValue.__getValue()
         else values[key] = value
@@ -103,23 +103,23 @@ type.defineHooks
       return
 
     if isType value, Object
-      map = @__animatedValues[key] or AnimatedMap {}
+      map = @_animatedValues[key] or AnimatedMap {}
       map.attach value
       @__attachAnimatedValue map, key
       return
 
-    @__values[key] = value
+    @_values[key] = value
     return
 
   __attachAnimatedValue: (animatedValue, key) ->
-    return if @__animatedValues[key]
-    @__values[key] = undefined # <= Preserve key order within this.__values
-    @__animatedValues[key] = animatedValue
+    return if @_animatedValues[key]
+    @_values[key] = undefined # <= Preserve key order within this._values
+    @_animatedValues[key] = animatedValue
     animatedValue.__addChild this, key
     return
 
   __connectNativeValues: ->
-    animatedValues = @__animatedValues
+    animatedValues = @_animatedValues
     nativeTags = []
     for key, value of animatedValues
       continue unless value.__isNative
@@ -138,8 +138,8 @@ type.defineHooks
     for key, animatedValue of @_animatedValues
       animatedValue.__removeChild this
 
-    @__values = {}
-    @__animatedValues = {}
+    @_values = {}
+    @_animatedValues = {}
     return
 
   # Detaches an `Animated` node if it has a new value.
@@ -162,12 +162,12 @@ type.defineHooks
       return if animatedValue is newValue
 
     animatedValue.__removeChild this
-    delete @__animatedValues[key]
+    delete @_animatedValues[key]
 
   # Detaches any `Animated` nodes that have new values.
   __detachAnimatedValues: (newValues) ->
     assertType newValues, Object
-    animatedValues = @__animatedValues
+    animatedValues = @_animatedValues
     for key, value of animatedValues
       @__detachAnimatedValue value, newValues[key]
     return
