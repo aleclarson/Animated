@@ -1,7 +1,6 @@
 
 assertType = require "assertType"
 isType = require "isType"
-Event = require "eve"
 Type = require "Type"
 
 AnimatedWithChildren = require "./AnimatedWithChildren"
@@ -13,10 +12,6 @@ Animated = require "./Animated"
 type = Type "AnimatedMap"
 
 type.inherits AnimatedWithChildren
-
-type.defineFrozenValues
-
-  didSet: -> Event()
 
 type.defineValues ->
 
