@@ -83,6 +83,8 @@ type.defineBoundMethods
       @elapsedTime = Date.now() - @startTime
 
     value = @__computeValue time
+    value = Math.round(value * 1e3) / 1e3
+
     @__onAnimationUpdate value
     @_lastTime = time
 
